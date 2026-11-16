@@ -112,6 +112,26 @@
   #solarPickedName{font-size:12px;font-weight:700;letter-spacing:.6px;color:#f1f7ff}
   #solarPickedData{margin-top:4px;color:#b4c9e5;font-size:10px;line-height:1.55;font-variant-numeric:tabular-nums}
   #solarPickedStatus{font-size:9px;color:#7fdbe4;margin-top:4px}
+
+/* ---------- edu cards: kid-level facts, every line sourced ---------- */
+#eduCard{margin-top:10px;border-top:1px solid rgba(125,180,255,.14);padding-top:10px}
+#eduDeck{display:none;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:9px}
+#eduDeck.open{display:grid}
+#eduDeck button{border:1px solid rgba(125,180,255,.22);background:rgba(125,180,255,.06);
+  color:#dbe7f7;font-size:9.5px;letter-spacing:.8px;padding:7px 4px;border-radius:7px;cursor:pointer}
+#eduDeck button:hover{background:rgba(125,180,255,.14);color:#7fdbe4}
+#eduDeck button.on{background:rgba(127,219,228,.18);color:#9fe8f0;border-color:rgba(127,219,228,.5)}
+#eduHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+#eduName{font-size:12.5px;font-weight:700;letter-spacing:1.2px;color:#f1f7ff;text-transform:uppercase}
+#eduDeckBtn{border:0;background:none;color:#7fdbe4;font-size:9px;letter-spacing:1px;cursor:pointer;padding:2px 0}
+#eduLive{margin-top:5px;font-size:10.5px;color:#9fe8f0;font-variant-numeric:tabular-nums}
+#eduFact{margin-top:7px;font-size:13px;line-height:1.6;color:#eef5ff}
+#eduSrc{margin-top:6px;font-size:9.5px;color:#8fa8c8}
+#eduNav{display:flex;align-items:center;gap:10px;margin-top:9px}
+#eduNav button{border:1px solid rgba(125,180,255,.25);background:rgba(125,180,255,.07);color:#dbe7f7;
+  font-size:11px;width:34px;height:28px;border-radius:7px;cursor:pointer}
+#eduNav button:hover{background:rgba(125,180,255,.16);color:#7fdbe4}
+#eduCount{font-size:10px;color:#8fa8c8;font-variant-numeric:tabular-nums}
   #solarRetry{display:none;margin:0 0 8px;border:1px solid var(--line-strong);border-radius:8px;background:rgba(77,163,255,.14);color:#dbe7f7;padding:6px 9px;font-size:9px;letter-spacing:.7px;cursor:pointer}
   #solarRetry.on{display:block}
   #scene canvas{touch-action:none;cursor:grab}
@@ -147,7 +167,9 @@
     body.celestial-mode #topbar{justify-content:space-between;gap:8px}
     body.celestial-mode #clock,body.celestial-mode #aboutBtn,body.celestial-mode #resetCamBtn{display:none}
     body.celestial-mode #focusSel{width:min(48vw,190px);font-size:10px}
-    body.celestial-mode #solarReadout{left:calc(8px + var(--sal));right:calc(8px + var(--sar));top:auto;bottom:calc(10px + var(--sab));width:auto;max-height:27vh;overflow:auto;padding:9px 11px;z-index:18}
+    body.celestial-mode #solarReadout{left:calc(8px + var(--sal));right:calc(8px + var(--sar));top:auto;bottom:calc(10px + var(--sab));width:auto;max-height:27vh;overflow:auto;padding:9px 11px;z-index:18;display:flex;flex-direction:column}
+  body.celestial-mode #solarReadout > h2{order:-2}
+  body.celestial-mode #eduCard{order:-1;margin-top:7px}
     body.celestial-mode #solarReadout h2{font-size:10px;margin-bottom:3px}
     body.celestial-mode #solarReadout .solar-note{font-size:9px;line-height:1.3;margin-bottom:5px}
     body.celestial-mode #solarSource{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
@@ -570,6 +592,18 @@
   <div id="solarSource">Loading NASA/JPL Horizons…</div>
   <button type="button" id="solarRetry">RETRY PLANET POSITIONS</button>
   <div id="solarRows"></div>
+  <div id="eduCard">
+    <div id="eduDeck" aria-label="Choose a fact card"></div>
+    <div id="eduHead"><span id="eduName"></span><button type="button" id="eduDeckBtn">ALL CARDS</button></div>
+    <div id="eduLive">--</div>
+    <div id="eduFact"></div>
+    <div id="eduSrc"></div>
+    <div id="eduNav">
+      <button type="button" id="eduPrev" aria-label="Previous fact">◀</button>
+      <span id="eduCount"></span>
+      <button type="button" id="eduNext" aria-label="Next fact">▶</button>
+    </div>
+  </div>
 </aside>
 
 <header id="topbar">
@@ -774,6 +808,7 @@
       <div class="k"><span>Fire detections</span><b><a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noreferrer">NASA FIRMS</a> VIIRS active-fire detections · MAP_KEY required · thermal anomalies, not confirmed incident perimeters</b></div>
       <div class="k"><span>Sea state</span><b>Open-Meteo marine model · North Sea gridpoint off Rotterdam</b></div>
       <div class="k"><span>Vessel positions</span><b>Live AIS via server-side proxy (needs a provider key) · each ship's ID shown in the list is its MMSI radio identifier</b></div>
+      <div class="k"><span>Fact cards</span><b>Curated from NASA's planetary fact sheets and mission pages · the "right now" numbers on each card are computed live from this app's NASA/JPL feed</b></div>
       <div class="k"><span>Lanes &amp; ports</span><b>Real coordinates, great-circle geometry</b></div>
       <div class="k"><span>Background sky</span><b>Synthetic random starfield — not a real star catalog</b></div>
       <p style="margin-top:12px;color:var(--muted)">Values on this page are drawn from the sources listed above.
@@ -2338,6 +2373,134 @@ controls.addEventListener('change', () => {
   if (activeFocus && !camTween) focusOffset.copy(controls.target).sub(activeFocus());
 });
 const ease = k => k < .5 ? 2*k*k : -1 + (4 - 2*k) * k;
+
+/* ============================================================
+   EDU CARDS — kid-level facts for each body in the view selector.
+   Static facts come from NASA's published planetary fact sheets
+   and mission pages; the "right now" line is computed from this
+   app's own NASA/JPL vectors and shows an honest -- when the
+   feed is unavailable. Never invented.
+   ============================================================ */
+const auFromSun = key => {
+  // AU distance from the Sun for one body, from the live JPL state vector
+  const v = planetState.bodies?.[key];
+  if (!v) return null;
+  const epoch = planetState.bodyEpoch?.[key] || planetState.requestedAt;
+  const age = epoch ? Math.max(0, Math.min(900, (Date.now() - Date.parse(epoch)) / 1000)) : 0;
+  return Math.hypot(v.xKm + v.vxKmS * age, v.yKm + v.vyKmS * age, v.zKm + v.vzKmS * age) / AU_KM;
+};
+const EDU_ORDER = ['sun','mercury','venus','earth','moon','mars','jupiter','saturn','uranus','neptune','pluto'];
+const EDU_CARDS = {
+  sun: { name:'The Sun', facts:[
+    ['The Sun is a star — our own. It looks bigger and brighter than other stars only because it is much closer to us.','NASA Science'],
+    ['About 1.3 million Earths would fit inside the Sun.','NASA Sun fact sheet'],
+    ['Sunlight takes about 8 minutes to reach Earth — you always see the Sun as it was 8 minutes ago.','NASA Science'],
+  ], live(){ const au = auFromSun('earth'); return au == null ? null : `Right now Earth is ${au.toFixed(3)} AU from the Sun`; } },
+  mercury: { name:'Mercury', facts:[
+    ['Mercury is the smallest planet — and the closest to the Sun.','NASA Planetary Fact Sheet'],
+    ['One year on Mercury lasts only 88 Earth days. You would have a birthday about every three months.','NASA Planetary Fact Sheet'],
+    ['Daytime reaches about 430 °C, but nights fall to −180 °C — the biggest temperature swing of any planet.','NASA Planetary Fact Sheet'],
+  ], live(){ const au = auFromSun('mercury'); return au == null ? null : `Right now Mercury is ${au.toFixed(3)} AU from the Sun`; } },
+  venus: { name:'Venus', facts:[
+    ['Venus is the hottest planet — about 465 °C — hotter than Mercury, because its thick CO₂ blanket traps the heat.','NASA Planetary Fact Sheet'],
+    ['Venus spins backwards compared with most planets, so the Sun there rises in the west.','NASA Science'],
+    ['A day on Venus (243 Earth days) is longer than its year (225 Earth days).','NASA Planetary Fact Sheet'],
+  ], live(){ const au = auFromSun('venus'); return au == null ? null : `Right now Venus is ${au.toFixed(3)} AU from the Sun`; } },
+  earth: { name:'Earth', facts:[
+    ['Earth is the only world where we have found life so far — protect it.','NASA Science'],
+    ['About 71% of Earth is covered by ocean — that is where all this app\u2019s ships sail.','NASA Science'],
+    ['You are riding Earth around the Sun at about 107,000 km/h right now.','NASA Planetary Fact Sheet'],
+  ], live(){ const a = parseFloat(document.getElementById('tIssAlt').textContent); return Number.isFinite(a) ? `Right now the ISS is passing about ${a.toFixed(0)} km overhead` : null; } },
+  moon: { name:'The Moon', facts:[
+    ['Only 12 people have ever walked on the Moon — all between 1969 and 1972.','NASA'],
+    ['With no wind or rain, footprints on the Moon can last for millions of years.','NASA Science'],
+    ['The Moon drifts 3.8 cm farther from Earth every year — measured by bouncing lasers off reflectors the astronauts left behind.','NASA/JPL lunar laser ranging'],
+  ], live(){ const r = parseFloat(document.getElementById('tMoonRange').textContent.replace(/,/g, '')); return Number.isFinite(r) ? `Right now the Moon is ${r.toLocaleString('en-US')} km from Earth` : null; } },
+  mars: { name:'Mars', facts:[
+    ['Mars is red because its dust is rusty — it contains iron that has oxidised.','NASA Science'],
+    ['Home of Olympus Mons, a volcano about 22 km tall — nearly 2.5 times the height of Everest.','NASA Planetary Fact Sheet'],
+    ['A day on Mars is 24 h 37 min — the closest day-length to Earth of any planet.','NASA Planetary Fact Sheet'],
+  ], live(){ const au = auFromSun('mars'); return au == null ? null : `Right now Mars is ${au.toFixed(3)} AU from the Sun`; } },
+  jupiter: { name:'Jupiter', facts:[
+    ['Jupiter is the biggest planet — more than 1,300 Earths would fit inside it.','NASA Planetary Fact Sheet'],
+    ['Its Great Red Spot is a storm wider than Earth that people have watched for over 350 years.','NASA Science'],
+    ['Jupiter has 95 known moons. Its moon Ganymede is bigger than the planet Mercury.','NASA (2023 moon count)'],
+  ], live(){ const au = auFromSun('jupiter'); return au == null ? null : `Right now Jupiter is ${au.toFixed(3)} AU from the Sun`; } },
+  saturn: { name:'Saturn', facts:[
+    ['Saturn\u2019s rings are made of ice chunks — from dust grains to house-sized boulders.','NASA Science'],
+    ['Saturn is the least dense planet — it would float in a bathtub big enough to hold it.','NASA Planetary Fact Sheet'],
+    ['Saturn has 274 known moons — the most of any planet.','NASA (2025 count)'],
+  ], live(){ const au = auFromSun('saturn'); return au == null ? null : `Right now Saturn is ${au.toFixed(3)} AU from the Sun`; } },
+  uranus: { name:'Uranus', facts:[
+    ['Uranus rolls around the Sun on its side, tilted about 98°.','NASA Planetary Fact Sheet'],
+    ['Its atmosphere is the coldest ever measured on a planet, about −224 °C.','NASA Science'],
+    ['It was the first planet found with a telescope — William Herschel spotted it in 1781.','NASA Science'],
+  ], live(){ const au = auFromSun('uranus'); return au == null ? null : `Right now Uranus is ${au.toFixed(3)} AU from the Sun`; } },
+  neptune: { name:'Neptune', facts:[
+    ['Neptune is the windiest world — gusts race past 2,000 km/h.','NASA Science'],
+    ['One Neptune year lasts 165 Earth years — it has completed just one lap since its discovery in 1846.','NASA Planetary Fact Sheet'],
+    ['It was found by maths first: predicted from Uranus\u2019s wobble, then spotted exactly where predicted.','NASA Science'],
+  ], live(){ const au = auFromSun('neptune'); return au == null ? null : `Right now Neptune is ${au.toFixed(3)} AU from the Sun`; } },
+  pluto: { name:'Pluto', facts:[
+    ['Pluto is a dwarf planet — reclassified in 2006, but still very much loved.','NASA Science'],
+    ['It is smaller than Earth\u2019s Moon, and one Pluto year lasts 248 Earth years.','NASA Planetary Fact Sheet'],
+    ['A spacecraft named New Horizons photographed a giant heart-shaped glacier on it in 2015.','NASA/New Horizons'],
+  ], live(){ const au = auFromSun('pluto'); return au == null ? null : `Right now Pluto is ${au.toFixed(3)} AU from the Sun`; } },
+  solar: { name:'The Solar System', facts:[
+    ['Eight planets, plus dwarf planets like Pluto, all orbit one star: the Sun.','NASA Science'],
+    ['The whole system formed about 4.6 billion years ago from a spinning cloud of gas and dust.','NASA Science'],
+    ['The Sun holds 99.8% of the solar system\u2019s mass — every planet, moon and asteroid together is just the leftovers.','NASA Science'],
+  ], live(){ const n = Object.keys(planetState.bodies || {}).length; return n ? `${n} bodies riding live NASA/JPL vectors` : null; } },
+};
+let eduKey = null, eduIdx = 0, eduDeckPinned = false;
+function eduLiveText(key) {
+  const live = EDU_CARDS[key]?.live?.();
+  return live ? live + ' · NASA/JPL live' : 'live number unavailable — awaiting NASA/JPL vectors';
+}
+function eduRender() {
+  const raw = document.getElementById('focusSel').value;
+  const key = EDU_CARDS[raw] ? raw : 'solar';
+  if (key !== eduKey) eduIdx = 0;
+  eduKey = key;
+  const card = EDU_CARDS[key];
+  const facts = card.facts;
+  document.getElementById('eduName').textContent = card.name;
+  document.getElementById('eduFact').textContent = facts[eduIdx % facts.length][0];
+  document.getElementById('eduSrc').textContent = 'Source: ' + facts[eduIdx % facts.length][1];
+  document.getElementById('eduCount').textContent = (eduIdx % facts.length + 1) + ' / ' + facts.length;
+  document.getElementById('eduLive').textContent = eduLiveText(key);
+  const deck = document.getElementById('eduDeck');
+  deck.classList.toggle('open', eduDeckPinned || key === 'solar');
+  deck.querySelectorAll('button').forEach(b =>
+    b.classList.toggle('on', b.dataset.edu === key));
+}
+// deck buttons fly the camera to the body they describe
+(function eduInit() {
+  const deck = document.getElementById('eduDeck');
+  const focus = document.getElementById('focusSel');
+  for (const key of EDU_ORDER) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.edu = key; b.textContent = EDU_CARDS[key].name.replace(/^The /, '');
+    b.title = 'Fly to ' + EDU_CARDS[key].name + ' and open its fact card';
+    b.onclick = () => { eduDeckPinned = true; focus.value = key === 'sun' ? 'sun' : key; focus.dispatchEvent(new Event('change')); };
+    deck.appendChild(b);
+  }
+  // 'solar' overview has no card of its own; treat it as a deck-open state
+  const sys = document.createElement('button');
+  sys.type = 'button'; sys.dataset.edu = 'solar'; sys.textContent = 'ALL';
+  sys.title = 'Show the whole solar system and the full card deck';
+  sys.onclick = () => { eduDeckPinned = false; focus.value = 'solar'; focus.dispatchEvent(new Event('change')); };
+  deck.appendChild(sys);
+  document.getElementById('eduDeckBtn').onclick = () => {
+    eduDeckPinned = !eduDeckPinned; eduRender();
+    document.getElementById('eduDeckBtn').textContent = eduDeckPinned ? 'CLOSE DECK' : 'ALL CARDS';
+  };
+  document.getElementById('eduPrev').onclick = () => { eduIdx--; eduRender(); };
+  document.getElementById('eduNext').onclick = () => { eduIdx++; eduRender(); };
+  document.getElementById('focusSel').addEventListener('change', () => { eduRender(); });
+  eduRender();
+  setInterval(() => { if (eduKey) document.getElementById('eduLive').textContent = eduLiveText(eduKey); }, 5000);
+})();
 document.getElementById('focusSel').onchange = (e) => {
   const key = e.target.value;
   locationFocus = null;
