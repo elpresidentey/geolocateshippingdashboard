@@ -375,6 +375,19 @@
   #onboard .txt{display:flex;flex-direction:column;gap:3px;font-size:12px;color:#c9dcf5;line-height:1.55}
   #onboard b{color:#fff;letter-spacing:.3px}
   #onboard button{flex:none}
+
+  /* ---------- event log: the ticker's slower sibling ---------- */
+  #feedlog{position:fixed;inset:0;z-index:55;background:rgba(3,6,15,.72);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none;place-items:center;padding:18px}
+  #feedlog.show{display:grid}
+  #feedlog .card{max-width:500px;width:94vw;max-height:72vh;overflow-y:auto;padding:20px 22px}
+  #feedlog h3{letter-spacing:3px;font-size:14px;margin-bottom:10px;color:#9dc7ff;text-transform:uppercase}
+  #feedlog .fl-note{font-size:12px;line-height:1.6;color:var(--muted);margin-bottom:10px}
+  #feedlog .row{display:flex;gap:10px;font-size:12.5px;color:#c9dcf5;padding:8px 0;
+    border-bottom:1px dashed rgba(125,180,255,.12);line-height:1.5}
+  #feedlog .row .t{flex:none;font-variant-numeric:tabular-nums;color:var(--muted);font-size:10.5px;padding-top:2px}
+  #feedlog .row b{color:#e6f1ff}
+  #ticker{cursor:pointer}
   #about{position:fixed;inset:0;z-index:60;background:rgba(3,6,15,.74);backdrop-filter:blur(14px);
     display:none;place-items:center;padding:calc(12px + var(--sat)) calc(8px + var(--sar)) calc(12px + var(--sab)) calc(8px + var(--sal))}
   #about .card{max-width:580px;width:92vw;max-height:calc(100dvh - var(--sat) - var(--sab) - 24px);
@@ -521,7 +534,7 @@
     #leftcol > #shipments > div:last-child{overflow-y:auto;min-height:0;
       -webkit-overflow-scrolling:touch}
     #rightcol > #watchPanel,#rightcol > #firePanel,#rightcol > #alerts{display:block;flex:0 0 auto}
-    .ship .eta{display:none}
+    .ship .eta.age{display:none}   /* drop the age line on phones; keep the speed visible */
   }
   @media (max-width:480px){
     #topbar{gap:5px;padding-right:8px;padding-left:8px}
@@ -552,7 +565,7 @@
 <div id="err"></div>
 <aside id="solarReadout" aria-label="Live solar system distances">
   <h2 id="solarReadoutTitle">Solar system · live positions</h2>
-  <div class="solar-note" id="solarNote">Independent view using NASA/JPL data. Radial distance is compressed; AU values are real. Planet sizes are enlarged for visibility.</div>
+  <div class="solar-note" id="solarNote">Independent view using NASA/JPL data. Distances on screen are squeezed to fit; AU values are real (1 AU = the Earth–Sun distance). Planet sizes are enlarged for visibility.</div>
   <div id="solarSelected"><div id="solarPickedName"></div><div id="solarPickedData"></div><div id="solarPickedStatus"></div></div>
   <div id="solarSource">Loading NASA/JPL Horizons…</div>
   <button type="button" id="solarRetry">RETRY PLANET POSITIONS</button>
@@ -597,21 +610,21 @@
     <button id="kpiToggle" type="button" aria-expanded="true"
       title="Park the telemetry tiles and give the globe the room">
       <span>Telemetry</span><i id="kpiChev">&#9662;</i></button>
-    <div class="kpi glass"><div class="lbl">ISS altitude</div><div class="val" id="tIssAlt">--<small>km</small></div>
+    <div class="kpi glass"><div class="lbl">ISS height</div><div class="val" id="tIssAlt">--<small>km</small></div>
       <div class="delta src" id="tIssPos">fetching position…</div><div class="spark"><i id="tIssBar" style="width:0%"></i></div></div>
-    <div class="kpi glass"><div class="lbl">ISS velocity</div><div class="val" id="tIssVel">--<small>km/h</small></div>
-      <div class="delta src" id="tIssVis">—</div><div class="spark"><i id="tVelBar" style="width:0%"></i></div></div>
+    <div class="kpi glass"><div class="lbl">ISS speed</div><div class="val" id="tIssVel">--<small>km/h</small></div>
+      <div class="delta src" id="tIssVis">-</div><div class="spark"><i id="tVelBar" style="width:0%"></i></div></div>
     <div class="kpi glass"><div class="lbl">Lagos</div><div class="val" id="tLagosT">--<small>°C</small></div>
       <div class="delta src" id="tLagosW">—</div><div class="spark"><i id="tLagosBar" style="width:0%"></i></div></div>
     <div class="kpi glass"><div class="lbl">Rotterdam</div><div class="val" id="tRotT">--<small>°C</small></div>
       <div class="delta src" id="tRotW">—</div><div class="spark"><i id="tRotBar" style="width:0%"></i></div></div>
-    <div class="kpi glass"><div class="lbl">Significant wave</div><div class="val" id="tSea">--<small>m</small></div>
-      <div class="delta src" id="tSeaSwell">North Sea · analysis</div><div class="spark"><i id="tSeaBar" style="width:0%"></i></div></div>
-    <div class="kpi glass"><div class="lbl">Subsolar point</div><div class="val" id="tSub">--<small>°</small></div>
+    <div class="kpi glass" title="Significant wave height — the tallest third of waves — from the marine model for the North Sea off Rotterdam"><div class="lbl">Sea height</div><div class="val" id="tSea">--<small>m</small></div>
+      <div class="delta src" id="tSeaSwell">North Sea · model</div><div class="spark"><i id="tSeaBar" style="width:0%"></i></div></div>
+    <div class="kpi glass" title="The subsolar point: where the Sun is exactly overhead right now, computed from UTC"><div class="lbl">Sun overhead at</div><div class="val" id="tSub">--<small>° lat</small></div>
       <div class="delta src" id="tSubDetail">computed from UTC</div><div class="spark"><i id="tSubBar" style="width:0%"></i></div></div>
-    <button type="button" class="kpi glass" id="moonKpi" title="Focus the camera on the Moon · live JPL ephemeris">
-      <div class="lbl">Moon · Earth range</div><div class="val"><span id="tMoonRange">--</span><small>km</small></div>
-      <div class="delta src" id="tMoonPhase">JPL Horizons · connecting</div><div class="spark" aria-hidden="true"><i id="tMoonBar" style="width:0%"></i></div>
+    <button type="button" class="kpi glass" id="moonKpi" title="Focus the camera on the Moon · live NASA-JPL tracking">
+      <div class="lbl">Moon distance</div><div class="val"><span id="tMoonRange">--</span><small>km</small></div>
+      <div class="delta src" id="tMoonPhase">NASA-JPL · connecting</div><div class="spark" aria-hidden="true"><i id="tMoonBar" style="width:0%"></i></div>
     </button>
   </section>
 
@@ -670,19 +683,19 @@
   </section>
 
   <section class="panel glass" id="firePanel">
-    <h2>Satellite Fire Detections <span class="count" id="fireCount">--</span></h2>
-    <p class="fire-note" id="fireSource">NASA FIRMS VIIRS detections · feed setup required</p>
+    <h2>Fires seen from space <span class="count" id="fireCount">--</span></h2>
+    <p class="fire-note" id="fireSource">NASA satellites detect hot spots · setup key needed</p>
     <div id="fireList"></div>
   </section>
 
   <section class="panel glass" id="alerts">
-    <h2>Monitor Signals <span class="count" id="alertCount">checking…</span></h2>
+    <h2>Live Signals <span class="count" id="alertCount">checking…</span></h2>
     <div id="alertList"></div>
   </section>
 </div>
 
 <div id="hud">
-  <span>Cam range <b id="hudAlt">31.4</b> Mm</span>
+  <span>Height <b id="hudAlt">31,400</b> km</span>
   <span>Zoom <b id="hudZoom">1.00x</b></span>
   <span>Routes <b id="hudRoutes">9</b></span>
   <span>FPS <b id="hudFps">60</b></span>
@@ -692,16 +705,24 @@
   <div class="txt">
     <b>Drag to orbit · scroll to zoom</b>
     <span>Tap a lane row to isolate one corridor — tap again to release.</span>
-    <span>VESSELS shows reported AIS positions. MONITOR holds saved-place weather and satellite fire detections.</span>
+    <span>VESSELS shows ships reporting now. MONITOR holds your saved places' weather and satellite fire alerts.</span>
   </div>
   <button id="onboardBtn" type="button" class="ghostbtn">Got it</button>
+</div>
+
+<div id="feedlog">
+  <div class="card glass">
+    <h3>Event log</h3>
+    <p class="fl-note">What the console actually observed, newest first, stamped with UTC — no invented events. The ribbon under the globe carries the latest of these; tap it to come back here.</p>
+    <div id="feedlogList"></div>
+  </div>
 </div>
 
 <div id="chips">
   <label class="chip"><input type="checkbox" id="lyClouds" checked aria-label="Clouds layer"><span>Clouds</span></label>
   <label class="chip" title="Global model precipitation and cloud cover · loading"><input type="checkbox" id="lyWeather" aria-label="Global model weather layer"><i class="weather-swatch" aria-hidden="true"></i><span>Weather</span></label>
   <label class="chip"><input type="checkbox" id="lyFires" checked aria-label="NASA satellite fire detections layer"><i class="fire-swatch" aria-hidden="true"></i><span>Fires</span></label>
-  <label class="chip"><input type="checkbox" id="lyWind" checked title="Wind streaks · Open-Meteo model analysis, pending" aria-label="Wind streaks layer"><span>Wind</span></label>
+  <label class="chip"><input type="checkbox" id="lyWind" checked title="Wind streaks · global weather model, loading" aria-label="Wind streaks layer"><span>Wind</span></label>
   <label class="chip"><input type="checkbox" id="lyLights" checked aria-label="City lights layer"><span>City lights</span></label>
   <label class="chip"><input type="checkbox" id="lyLanes" checked aria-label="Shipping lanes layer"><span>Lanes</span></label>
   <label class="chip"><input type="checkbox" id="lyLabels" checked aria-label="Port labels layer"><span>Port labels</span></label>
@@ -710,7 +731,7 @@
   <label class="chip"><input type="checkbox" id="lyReal" checked aria-label="Real-time sun layer"><span>Real-time sun</span></label>
 </div>
 
-<footer id="ticker">
+<footer id="ticker" role="button" tabindex="0" title="Latest events — tap to open the log" aria-label="Live feed ribbon, opens the event log">
   <div class="lbl">LIVE FEED</div>
   <div class="track" id="tickerTrack"></div>
 </footer>
@@ -752,7 +773,7 @@
       <div class="k"><span>Global weather</span><b><a href="https://open-meteo.com/en/docs" target="_blank" rel="noreferrer">Open-Meteo</a> cloud cover and precipitation model analysis · global 15° grid · not satellite observations</b></div>
       <div class="k"><span>Fire detections</span><b><a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noreferrer">NASA FIRMS</a> VIIRS active-fire detections · MAP_KEY required · thermal anomalies, not confirmed incident perimeters</b></div>
       <div class="k"><span>Sea state</span><b>Open-Meteo marine model · North Sea gridpoint off Rotterdam</b></div>
-      <div class="k"><span>Vessel positions</span><b>Live AIS via server-side proxy (needs a provider key)</b></div>
+      <div class="k"><span>Vessel positions</span><b>Live AIS via server-side proxy (needs a provider key) · each ship's ID shown in the list is its MMSI radio identifier</b></div>
       <div class="k"><span>Lanes &amp; ports</span><b>Real coordinates, great-circle geometry</b></div>
       <div class="k"><span>Background sky</span><b>Synthetic random starfield — not a real star catalog</b></div>
       <p style="margin-top:12px;color:var(--muted)">Values on this page are drawn from the sources listed above.
@@ -1070,7 +1091,7 @@ function updateMoonDisplay(nowMs) {
       timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
     });
     const ageLabel = ageS < 90 ? '' : ` · ${Math.floor(ageS / 60)}m old`;
-    phaseText = `${moonPhaseLabel(phaseAngle)} · ${phasePercent}% lit · JPL ${sampleSec}Z${ageLabel}`;
+    phaseText = `${moonPhaseLabel(phaseAngle)} · ${phasePercent}% lit${ageLabel}`;
   } else {
     const meanAngle = 2 * Math.PI * (nowMs - 947731080000) / (27.321661 * 86400000);
     const rKm = 384400;
@@ -1078,7 +1099,7 @@ function updateMoonDisplay(nowMs) {
       .multiplyScalar(rKm * EARTH_R / EARTH_KM);
     distanceKm = rKm;
     phasePercent = Math.round((1 - position.clone().normalize().dot(sunDirUniform.value.clone().normalize())) * 50);
-    phaseText = moonState.error ? 'JPL unavailable · mean-orbit estimate' : 'JPL Horizons · connecting';
+    phaseText = moonState.error ? 'NASA-JPL offline · rough estimate shown' : 'NASA-JPL · connecting';
     phaseText += ` · ${phasePercent}% lit`;
   }
 
@@ -1364,8 +1385,10 @@ function renderIssTiles() {
     (issState.vel - 27000) / 1500);
   const footKm = 2 * EARTH_KM * Math.acos(Math.min(1, EARTH_KM / (EARTH_KM + issState.alt)));
   document.getElementById('tIssVis').textContent =
-    issVisibility + ' · footprint ' + Math.round(footKm).toLocaleString() + ' km' +
-    (sgp4Active() ? ' · SGP4' : ' · TLE anchor');
+    issVisibility + ' · sees ' + Math.round(footKm).toLocaleString() + ' km of Earth below';
+  document.getElementById('tIssVis').title = sgp4Active()
+    ? 'Position propagated from the ISS orbital elements (SGP4 model)'
+    : 'Position anchored to recorded telemetry (TLE fallback)';
   deriveAlertsFrom(issState.ready ? { ...issState, visibility: issVisibility } : null, observed);
   renderTicker();
 }
@@ -1867,15 +1890,27 @@ function renderVesselList(list) {
       <div class="top">
         <span class="tag ${tag}">${tagTxt}</span>
         <span class="name">${esc(vesselLabel(v))}</span>
-        <span class="eta">${kn != null ? kn.toFixed(1) + ' kn' : 'no AIS'}</span>
+        <span class="eta">${kn != null ? kn.toFixed(1) + ' knots' : 'no AIS'}</span>
       </div>
-      <div class="lane">${fmtLatLon(v.lat, v.lon)} · MMSI ${esc(String(v.mmsi))}</div>
+      <div class="lane" title="MMSI — the ship's radio ID, broadcast with its position">${fmtLatLon(v.lat, v.lon)} · ID ${esc(String(v.mmsi))}</div>
       <div class="prog ${tag}"><i style="width:${kn != null ? Math.min(100, kn / 25 * 100) : 0}%"></i></div>
-      <div class="eta">${ageTxt}</div>
+      <div class="eta age">${ageTxt}</div>
     </div>`;
   }).join('');
   count.textContent = shown.length + (shipFilter === 'all' ? ' live' : ' shown · ' + list.length + ' live') +
     ' · ' + new Date().toISOString().slice(11, 16) + ' UTC';
+}
+
+/* Event log: the ticker is a fast ribbon; this keeps the events it
+   advertises, so nothing the console observed scrolls away unread. Only
+   real state changes land here — no invented entries, no filler. */
+const eventsLog = [];
+let lastFeedEvent = '';
+function logEvent(html) {
+  eventsLog.unshift({ t: new Date().toISOString().slice(11, 16), html });
+  if (eventsLog.length > 14) eventsLog.length = 14;
+  document.getElementById('feedlogList').innerHTML = eventsLog.map(e =>
+    `<div class="row"><span class="t">${e.t}</span><span>${e.html}</span></div>`).join('');
 }
 
 async function loadVessels() {
@@ -1888,21 +1923,26 @@ async function loadVessels() {
     aisState.configured = data.configured;
     aisState.message = data.message || data.error || '';
 
+    let feedEvent;
     if (!data.configured) {
       liveVessels = [];
       aisState.message = 'Live AIS not configured on this deployment';
       setPill('pillAis', 'warn', 'AIS not configured');
+      feedEvent = '<b>Live AIS</b> — not set up on this deployment · lane geometry is real';
     } else if (!Array.isArray(data.vessels) || !data.vessels.length) {
       liveVessels = [];
       aisState.message = data.error ? 'AIS feed error: ' + data.error
         : 'AIS feed returned no positions';
       setPill('pillAis', 'warn', 'AIS no positions');
+      feedEvent = `<b>Live AIS</b> — ${esc(aisState.message)}`;
     } else {
       liveVessels = data.vessels;
       aisState.lastOk = Date.now();
       aisState.message = '';
       setPill('pillAis', 'ok', 'AIS live · ' + data.vessels.length);
+      feedEvent = `<b>Live AIS</b> — ${data.vessels.length} vessels reporting · positions as received`;
     }
+    if (feedEvent !== lastFeedEvent) { lastFeedEvent = feedEvent; logEvent(feedEvent); }
     updateVesselPositions(liveVessels);
     renderVesselList(liveVessels);
     updateLaneTallies(liveVessels);   // corridor styles/badges follow the feed
@@ -1915,6 +1955,8 @@ async function loadVessels() {
     renderVesselList([]);
     updateLaneTallies([]);            // no feed, no claimed traffic
     renderTicker();
+    const feedEvent = `<b>Live AIS</b> — offline · ${esc(aisState.message)} · lane geometry is real`;
+    if (feedEvent !== lastFeedEvent) { lastFeedEvent = feedEvent; logEvent(feedEvent); }
   }
 }
 
@@ -1934,12 +1976,16 @@ setInterval(loadVessels, AIS_POLL_MS);
 /* Alerts are derived from live conditions (ISS pass, weather, sea state).
    Nothing here is a canned string with a fictional timestamp. */
 const alerts = [];
-function pushAlert(level, icon, text, meta) { alerts.push([level, icon, text, meta]); }
+function pushAlert(level, icon, text, meta) {
+  alerts.push([level, icon, text, meta]);
+  // only true warnings reach the log — the panel's own info rows stay there
+  if (level !== 'info') logEvent(`<b>Warning</b> — ${text}${meta ? ` · ${esc(meta)}` : ''}`);
+}
 function renderAlerts() {
   const list = document.getElementById('alertList');
   if (!alerts.length) {
     list.innerHTML = '<div class="alert info"><div class="ico">i</div>' +
-      '<div class="txt">No advisories from monitored sources<span class="meta">checked just now</span></div></div>';
+      '<div class="txt">No warnings right now<span class="meta">checked just now</span></div></div>';
   } else {
     list.innerHTML = alerts.map(a =>
       `<div class="alert ${a[0]}"><div class="ico">${a[1]}</div><div class="txt">${a[2]}<span class="meta">${a[3]}</span></div></div>`).join('');
@@ -2678,14 +2724,18 @@ async function loadWindField() {
     }
     wxState.ready = true;
     paintWeatherLayer();
-    chip.title = 'Wind streaks · Open-Meteo 10-m model analysis ' + wxObservedAt;
+    chip.title = 'Wind streaks · global weather model · ' + wxObservedAt;
+    if (wxObservedAt !== lastWindStamp) {
+      lastWindStamp = wxObservedAt;
+      logEvent(`<b>Wind pattern</b> — refreshed · ${esc(wxObservedAt)} model read`);
+    }
     windGroup.visible = chip.checked;
     const weatherChip = $layer('lyWeather');
-    weatherChip.title = 'Cloud cover and precipitation (mm) · Open-Meteo model analysis · 15° grid · ' + wxObservedAt;
+    weatherChip.title = 'Cloud cover and rain · global weather model · 15° grid · ' + wxObservedAt;
     weatherGroup.visible = weatherChip.checked;
   } catch (err) {
     if (!wxState.ready) {                                  // never had data: stay hidden
-      chip.title = 'Wind streaks · model analysis unavailable';
+      chip.title = 'Wind streaks · weather model unavailable';
       windGroup.visible = false;
       $layer('lyWeather').title = 'Weather model unavailable';
       weatherGroup.visible = false;
@@ -2695,6 +2745,7 @@ async function loadWindField() {
     wxLoading = false;
   }
 }
+let lastWindStamp = '';
 
 // layer toggles
 const $layer = id => document.getElementById(id);
@@ -2724,6 +2775,15 @@ document.getElementById('aboutTabs').addEventListener('click', e => {
   if (!btn) return;
   document.querySelectorAll('#aboutTabs button').forEach(b => b.classList.toggle('on', b === btn));
   document.querySelectorAll('#about .pane').forEach(p => p.classList.toggle('on', p.id === btn.dataset.tab));
+});
+// The ticker is a fast ribbon; clicking it opens the slower event log.
+document.getElementById('ticker').addEventListener('click', () =>
+  document.getElementById('feedlog').classList.add('show'));
+document.getElementById('feedlog').addEventListener('click', e => {
+  if (e.target.id === 'feedlog') e.currentTarget.classList.remove('show');
+});
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('feedlog').classList.remove('show');
 });
 // ---------- PWA ----------
 const installBtn = document.getElementById('installBtn');
@@ -2915,7 +2975,7 @@ async function loadPortWeather() {
           if (!mr.ok) throw new Error('HTTP ' + mr.status);
           wave = (await mr.json()).current.wave_height;
           if (wave != null) setTile('tSea', wave.toFixed(2) + '<small>m</small>', 'tSeaBar', wave / 4);
-          document.getElementById('tSeaSwell').textContent = `North Sea off ${p.key} · analysis`;
+          document.getElementById('tSeaSwell').textContent = `North Sea off ${p.key} · model`;
         } catch (marineError) {
           // Sea-state has a separate endpoint; do not downgrade healthy port weather.
           failTile('tSea', 'tSeaSwell', 'tSeaBar', `Sea state unavailable · ${marineError.message}`);
@@ -3144,7 +3204,7 @@ function renderFireList() {
     return;
   }
   list.innerHTML = fireObservations.slice(0, 8).map((fire, i) =>
-    `<div class="fire-row" data-fire-view="${i}"><b>${fire.frp == null ? 'FRP —' : `FRP ${fire.frp.toFixed(1)} MW`}</b>` +
+    `<div class="fire-row" data-fire-view="${i}" title="FRP: fire radiative power — how much heat energy the fire radiates, in megawatts"><b>${fire.frp == null ? 'heat unavailable' : `heat ${fire.frp.toFixed(1)} MW`}</b>` +
     `<small>${esc(fire.confidence || 'confidence unavailable')} · ${fire.lat.toFixed(2)}°, ${fire.lon.toFixed(2)}°<br>${esc(fire.acquiredAt || 'time unavailable')} UTC</small></div>`).join('');
 }
 
@@ -3246,7 +3306,9 @@ function animate() {
       document.getElementById('tSub').innerHTML =
         (s.decl >= 0 ? '+' : '−') + Math.abs(s.decl).toFixed(2) + '<small>° lat</small>';
       document.getElementById('tSubDetail').textContent =
-        `lon ${s.subLon.toFixed(1)}° · EoT ${s.eot >= 0 ? '+' : '−'}${Math.abs(s.eot).toFixed(1)} min`;
+        `lon ${s.subLon.toFixed(1).replace('-', '−')}°`;
+      document.getElementById('tSubDetail').title =
+        `The Sun stands exactly overhead at this longitude. The small equation-of-time clock offset (${s.eot >= 0 ? '+' : '−'}${Math.abs(s.eot).toFixed(1)} min) lives in ABOUT → Data & sources.`;
       document.getElementById('tSubBar').style.width = Math.abs(s.decl / 23.44) * 100 + '%';
     }
   }
@@ -3314,9 +3376,9 @@ function animate() {
   fpsAcc += dt; fpsFrames++;
   if (fpsAcc >= 0.5) {
     document.getElementById('hudFps').textContent = Math.round(fpsFrames / fpsAcc);
-    // camera range from Earth's centre, in megametres at the true scene scale
+    // camera height above Earth's centre, in whole kilometres at the true scene scale
     document.getElementById('hudAlt').textContent =
-      (camera.position.length() * (EARTH_KM / EARTH_R) / 1000).toFixed(1);
+      Math.round(camera.position.length() * (EARTH_KM / EARTH_R)).toLocaleString();
     document.getElementById('hudZoom').textContent = (camera.position.length() / 15.9).toFixed(2) + 'x';
     fpsAcc = 0; fpsFrames = 0;
   }
