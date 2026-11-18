@@ -54,12 +54,13 @@
   }
   .panel{position:fixed;z-index:10;width:330px;padding:14px 16px 16px}
   .panel > h2{
-    display:flex;align-items:center;gap:8px;
+    display:flex;align-items:center;gap:8px;white-space:nowrap;
     font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:#9dc7ff;
     margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line);
   }
   .panel > h2::before{content:'';width:3px;height:12px;border-radius:2px;background:linear-gradient(180deg,var(--accent),var(--accent-2))}
-  .panel > h2 .count{margin-left:auto;color:var(--muted);letter-spacing:1px;font-weight:500}
+  .panel > h2 .count{margin-left:auto;min-width:0;color:var(--muted);letter-spacing:1px;font-weight:500;
+    overflow:hidden;text-overflow:ellipsis}
 
   /* ---------- top bar ---------- */
   #topbar{
@@ -183,11 +184,13 @@
   }
 
   /* ---------- KPI tiles ---------- */
+  /* Every source line reserves two rows, so a one-line caption and a
+     two-line caption keep their meters on the same baseline. */
   .kpi{padding:12px 14px;border-radius:var(--r-lg)}
   .kpi .lbl{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
   .kpi .val{font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:3px;font-variant-numeric:tabular-nums}
   .kpi .val small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px}
-  .kpi .delta{font-size:10px;letter-spacing:.6px;margin-top:2px}
+  .kpi .delta{font-size:10px;letter-spacing:.6px;margin-top:2px;line-height:1.4;min-height:2.8em}
   .up{color:var(--ok)} .down{color:var(--bad)}
   .kpi .delta.src{color:var(--muted);font-size:9.5px;letter-spacing:.4px}
   .kpi .delta.src.err{color:var(--warn)}
@@ -201,7 +204,7 @@
   #moonKpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   #moonKpi .lbl{grid-column:1;grid-row:1;white-space:nowrap}
   #moonKpi .val{grid-column:2;grid-row:1;margin:0;font-size:18px;white-space:nowrap}
-  #moonKpi .delta{grid-column:1/3;grid-row:2;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #moonKpi .delta{grid-column:1/3;grid-row:2;margin:0;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #moonKpi .spark{grid-column:3;grid-row:1/3;margin:0;height:5px}
 
   /* ---------- left column: KPIs + shipments ---------- */
@@ -227,7 +230,7 @@
   #kpiToggle{grid-column:1/-1;display:flex;align-items:center;justify-content:
     space-between;background:var(--glass);border:1px solid var(--line);
     border-radius:var(--r-md);padding:7px 12px;color:#bcd6f5;cursor:pointer;
-    font-family:inherit;font-size:10px;letter-spacing:1.8px;text-transform:uppercase}
+    font-family:inherit;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;box-shadow:none}
   #kpiToggle:hover{border-color:rgba(125,214,199,.5)}
   #kpiToggle i{font-style:normal;color:#7fa8d8}
   #kpis.collapsed .kpi{display:none}
@@ -331,7 +334,8 @@
     -webkit-backdrop-filter:blur(9px) saturate(130%);
     box-shadow:0 10px 26px rgba(0,0,0,.4);
   }
-  #lanebar::-webkit-scrollbar{height:0}
+  #lanebar::-webkit-scrollbar{height:4px}
+  #lanebar{scrollbar-width:thin}
   #lanebar .lanebar-title{font-size:9.5px;letter-spacing:1.8px;color:var(--muted);flex:none}
   #lanebar .lanebar-title b{color:#dceaff}
   #legendList{display:flex;gap:6px;overflow-x:auto}
@@ -355,7 +359,10 @@
   
 
 
-  #hud{position:fixed;left:50%;bottom:calc(56px + var(--sab));transform:translateX(-50%);z-index:9;
+  /* The bottom band is a stack, not a pile: ticker (38) → lane bar (46) →
+     camera readout → orientation card. The HUD used to sit at 56px and was
+     completely covered by the lane bar. */
+  #hud{position:fixed;left:50%;bottom:calc(105px + var(--sab));transform:translateX(-50%);z-index:9;
     display:flex;gap:14px;align-items:center;padding:7px 16px;border-radius:999px;
     font-size:10.5px;letter-spacing:1.6px;color:#9fc0e8;text-transform:uppercase;
     background:rgba(10,18,36,.5);border:1px solid var(--line);backdrop-filter:blur(10px)}
@@ -391,11 +398,11 @@
   .fire-swatch{width:7px;height:7px;border-radius:50%;flex:none;background:#ff8c4d;box-shadow:0 0 8px #ff5b35}
 
   /* ---------- first-run orientation: one card, shown once, gone forever ---------- */
-  #onboard{position:fixed;left:50%;bottom:calc(84px + var(--sab));transform:translateX(-50%);
+  #onboard{position:fixed;left:50%;bottom:calc(142px + var(--sab));transform:translateX(-50%);
     z-index:40;display:none;max-width:560px;width:min(92vw,560px);padding:14px 18px;border-radius:var(--r-lg);
     align-items:center;gap:14px}
   #onboard.show{display:flex}
-  #onboard .txt{display:flex;flex-direction:column;gap:3px;font-size:12px;color:#c9dcf5;line-height:1.55}
+  #onboard .txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:12px;color:#c9dcf5;line-height:1.55}
   #onboard b{color:#fff;letter-spacing:.3px}
   #onboard button{flex:none}
 
@@ -451,10 +458,19 @@
   .pills{flex-wrap:nowrap}
   @media (max-width:1280px){
     #leftcol,#rightcol{width:300px}
+    /* The chip strip is as wide as the gutter allows, which at these widths
+       is wider than the gap between the columns. Start the columns below it
+       so no chip sits on a panel header. */
+    #leftcol,#rightcol{top:calc(128px + var(--sat))}
   }
   @media (max-width:1180px){
     #chips{gap:5px}
     .chip{font-size:9.5px;padding:5px 9px;letter-spacing:.8px}
+    /* Narrow columns need tighter type so captions and headings stay on
+       one line instead of wrapping into the next element. */
+    .kpi .lbl{font-size:9px;letter-spacing:1.2px}
+    .panel > h2{font-size:10.5px;letter-spacing:1.6px}
+    .panel > h2 .count{font-size:10px;letter-spacing:.5px}
   }
   @media (max-width:1080px){
     #leftcol,#rightcol{width:280px}
@@ -478,7 +494,11 @@
     .logo b{font-size:11px;letter-spacing:2px}
     .logo span{font-size:8px;letter-spacing:1.8px}
     #clock{font-size:11px;letter-spacing:1px;padding:4px 10px}
-    #focusSel{display:block;width:110px;padding:5px 8px;font-size:9.5px;letter-spacing:.4px}
+    /* The camera reset duplicated the "Earth operations" entry in the focus
+       menu and, at 390px, sat entirely outside the bar. Drop it and let the
+       focus menu give up width instead, so nothing is clipped. */
+    #resetCamBtn{display:none}
+    #focusSel{display:block;flex:0 1 auto;min-width:0;width:110px;padding:5px 8px;font-size:9.5px;letter-spacing:.4px}
     #chips{top:calc(56px + var(--sat));left:0;right:0;transform:none;
       max-width:100vw;width:100vw;
       justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;
@@ -490,9 +510,9 @@
     #lanebar,#hud{display:none}
 
     /* Telemetry strip: one scrollable row pinned under the chips.
-       Height is explicit so the drawer below it can start at a known offset
-       instead of guessing at the tallest tile. */
-    #kpis{position:fixed;left:0;right:0;top:calc(96px + var(--sat));z-index:11;
+       The chips row is 47px tall under the 56px bar, so the strip starts at
+       108px: at 96px it was 11px inside the chips and hid their bottom edge. */
+    #kpis{position:fixed;left:0;right:0;top:calc(108px + var(--sat));z-index:11;
       display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
       scrollbar-width:none;height:78px;
       padding:0 calc(8px + var(--sar)) 6px calc(8px + var(--sal));
@@ -508,6 +528,7 @@
     .kpi .val small{font-size:10px}
     .kpi .delta.src{font-size:9.5px;white-space:nowrap;
       overflow:hidden;text-overflow:ellipsis}
+    .kpi .delta{min-height:0}
     .spark{margin-top:5px}
     #moonKpi{display:block;grid-column:auto;padding:7px 9px}
     #moonKpi .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -558,6 +579,11 @@
       -webkit-overflow-scrolling:touch}
     #rightcol > #watchPanel,#rightcol > #firePanel,#rightcol > #alerts{display:block;flex:0 0 auto}
     .ship .eta.age{display:none}   /* drop the age line on phones; keep the speed visible */
+
+    /* The tip sat 2px into the tab row; lift it clear and let the copy use
+       the full card width instead of wrapping around the button. */
+    #onboard{bottom:calc(100px + var(--sab));flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px}
+    #onboard button{align-self:flex-end}
   }
   @media (max-width:480px){
     #topbar{gap:5px;padding-right:8px;padding-left:8px}
@@ -569,7 +595,7 @@
     #focusSel{width:100px;padding:4px 6px;font-size:9px}
     #installBtn{padding:4px 10px;font-size:10px}
     .kpi{width:116px}
-    #kpis{top:calc(92px + var(--sat));height:74px}
+    #kpis{top:calc(108px + var(--sat));height:74px}
     .kpi{height:68px}
     #leftcol.open{max-height:46vh}
     .ship .name{font-size:11.5px}
@@ -736,7 +762,7 @@
   <span>FPS <b id="hudFps">60</b></span>
 </div>
 
-<div id="onboard">
+<div id="onboard" class="glass">
   <div class="txt">
     <b>Drag to orbit · scroll to zoom</b>
     <span>Tap a lane row to isolate one corridor — tap again to release.</span>
