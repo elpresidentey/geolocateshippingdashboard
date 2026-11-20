@@ -45,8 +45,11 @@ warnings or a substitute for local authorities.
   temporarily unavailable.
 - The background starfield is synthetic, not a star catalog.
 - The planet map textures are visual references, not scientific imagery
-  products. The Pluto map is NASA New Horizons data; other maps are from Solar
-  System Scope and distributed under CC BY 4.0.
+  products. The Pluto map is NASA New Horizons data; the other maps (including
+  the Moon and Sun) are from Solar System Scope and distributed under CC BY 4.0.
+  They are bundled under `textures/` because the upstream CDN sends no CORS
+  header, which made the browser reject every cross-origin planet map and fall
+  back to flat colours. Attribution and licence details are in `textures/README.md`.
 - Global weather fields are sampled at 15° intervals and interpolated for
   display. They are model output, not satellite imagery or station observations.
 - Saved weather places use point forecasts. Advisory thresholds are screening

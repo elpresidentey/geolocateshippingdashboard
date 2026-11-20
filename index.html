@@ -822,7 +822,7 @@
     </div>
     <div id="abData" class="pane">
       <div class="k"><span>Basemap</span><b>Blue Marble-class texture via third-party mirror (provenance unverified)</b></div>
-      <div class="k"><span>Planet maps</span><b><a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer">Solar System Scope</a> equirectangular composites · CC BY 4.0 · some unmapped areas use source fills</b></div>
+      <div class="k"><span>Planet maps</span><b><a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer">Solar System Scope</a> equirectangular composites, bundled locally · CC BY 4.0 · Moon and Sun from the same pack · some unmapped areas use source fills</b></div>
       <div class="k"><span>City lights</span><b>NASA "Earth at Night" composite (pre-VIIRS, not Black Marble)</b></div>
       <div class="k"><span>Clouds</span><b>Static MODIS-derived composite — not live satellite imagery</b></div>
       <div class="k"><span>Day / night</span><b>UTC → solar longitude + declination + equation of time; geometry and tiles share one source</b></div>
@@ -874,10 +874,14 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /* ============================================================
-   Verified texture sources (all HTTP 200, CORS enabled)
+   Texture sources. Earth's day/night/cloud maps come from three.js
+   (CORS enabled). The other maps are bundled under /textures: the
+   upstream CDN serves the JPEGs without an Access-Control-Allow-Origin
+   header, so loading them cross-origin made every planet fall back to
+   a flat colour.
    ============================================================ */
 const THREE_TEX = 'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets/';
-const PLANET_TEX = 'https://cdn.solarsystemscope.com/textures/download/';
+const PLANET_TEX = '/textures/';
 
 const loader = new THREE.TextureLoader();
 function loadTex(url) {
@@ -989,7 +993,7 @@ const [dayTex, nightTex, cloudTex, bumpTex, specTex, moonTex] = await Promise.al
   loadTex(THREE_TEX + 'earth_clouds_2048.png'),
   loadTex(THREE_TEX + 'earth_normal_2048.jpg'),
   loadTex(THREE_TEX + 'earth_specular_2048.jpg'),
-  loadTex(THREE_TEX + 'moon_1024.jpg')
+  loadTex(PLANET_TEX + '2k_moon.jpg')
 ]);
 
 const earthMat = new THREE.MeshPhongMaterial({
@@ -1458,7 +1462,7 @@ function renderIssTiles() {
 /* ============================================================
    OTHER PLANETS — lit by the same single sun
    ============================================================ */
-const [merTex, venTex, venCloudTex, jupTex, satTex, marsTex, uraTex, nepTex, ringTex, pluTex, earthRefTex] = await Promise.all([
+const [merTex, venTex, venCloudTex, jupTex, satTex, marsTex, uraTex, nepTex, ringTex, pluTex, earthRefTex, sunTex] = await Promise.all([
   loadTex(PLANET_TEX + '2k_mercury.jpg'),
   loadTex(PLANET_TEX + '2k_venus_surface.jpg'),
   loadTex(PLANET_TEX + '2k_venus_atmosphere.jpg'),
@@ -1468,8 +1472,9 @@ const [merTex, venTex, venCloudTex, jupTex, satTex, marsTex, uraTex, nepTex, rin
   loadTex(PLANET_TEX + '2k_uranus.jpg'),
   loadTex(PLANET_TEX + '2k_neptune.jpg'),
   loadTex(PLANET_TEX + '2k_saturn_ring_alpha.png'),
-  loadTex('https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia11/pia11707/PIA11707.jpg'),
-  loadTex(PLANET_TEX + '2k_earth_daymap.jpg')
+  loadTex(PLANET_TEX + 'pluto_nasa.jpg'),
+  loadTex(PLANET_TEX + '2k_earth_daymap.jpg'),
+  loadTex(PLANET_TEX + '2k_sun.jpg')
 ]);
 
 // Planet locations come from current, Sun-centered NASA/JPL Horizons vectors.
@@ -1479,7 +1484,7 @@ const planetDisplay = new THREE.Group();
 planetDisplay.visible = false;
 scene.add(planetDisplay);
 const solarCore = new THREE.Mesh(new THREE.SphereGeometry(1.65, 64, 64),
-  new THREE.MeshBasicMaterial({ color: 0xffc66b }));
+  new THREE.MeshBasicMaterial({ map: sunTex, color: sunTex ? 0xffffff : 0xffc66b }));
 planetDisplay.add(solarCore);
 const solarHalo = new THREE.Mesh(new THREE.SphereGeometry(3.1, 48, 48),
   new THREE.MeshBasicMaterial({ color: 0xffa947, transparent: true, opacity: 0.09, side: THREE.BackSide, depthWrite: false }));
@@ -2299,7 +2304,15 @@ async function loadPlanetEphemeris() {
   planetLoadPromise = (async () => {
     try {
       const response = await fetch('/api/planets', { cache: 'no-store' });
-      const data = await response.json();
+      let data;
+      try { data = await response.json(); }
+      catch {
+        // An HTML error page (deployment fault, proxy, 404) would otherwise
+        // surface the browser's raw JSON parser message in the panel.
+        throw new Error(response.ok
+          ? 'JPL position feed returned an unreadable response.'
+          : `JPL position feed unavailable (HTTP ${response.status}).`);
+      }
       if (!response.ok || !data.bodies) throw new Error(data.error || `Planet positions returned HTTP ${response.status}`);
       const receivedAt = data.requestedAt || new Date().toISOString();
       planetState.bodies = { ...(planetState.bodies || {}), ...data.bodies };
@@ -3743,6 +3756,15 @@ showSheet('');
 const launchView = new URLSearchParams(location.search).get('view');
 if (launchView === 'tracker') showSheet('leftcol');
 if (launchView === 'monitor') showSheet('rightcol');
+/* Any camera view can be deep-linked (useful for manifest shortcuts and for
+   checking a scene like the solar system without driving the select by hand). */
+if (launchView) {
+  const selector = document.getElementById('focusSel');
+  if ([...selector.options].some(option => option.value === launchView)) {
+    selector.value = launchView;
+    selector.dispatchEvent(new Event('change'));
+  }
+}
 
 /* ---------- personal live-camera connections ----------
    Feeds are added by the user, kept only in this browser, and opened on demand
