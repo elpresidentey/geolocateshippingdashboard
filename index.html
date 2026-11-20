@@ -109,31 +109,50 @@
   #solarRows button:disabled{opacity:.42;cursor:default}
   #solarRows button:hover{color:#7fdbe4}
   #solarRows span{color:#a9bfdd;text-align:right}
-  #solarSelected{display:none;margin:0 0 10px;padding:9px;border:1px solid var(--line);border-radius:var(--r-md);background:rgba(24,58,52,.35)}
+  #solarSelected{display:none;margin:0 0 10px;padding:10px 11px;border:1px solid var(--line);
+    border-left:2px solid var(--accent);border-radius:var(--r-md);background:rgba(24,58,52,.35)}
   #solarSelected.on{display:block}
-  #solarPickedName{font-size:12px;font-weight:700;letter-spacing:.6px;color:#f1f7ff}
-  #solarPickedData{margin-top:4px;color:#b4c9e5;font-size:10px;line-height:1.55;font-variant-numeric:tabular-nums}
-  #solarPickedStatus{font-size:9px;color:#7fdbe4;margin-top:4px}
+  #solarPickedName{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f1f7ff}
+  #solarPickedData{margin-top:5px;color:#b4c9e5;font-size:10px;line-height:1.55;font-variant-numeric:tabular-nums}
+  #solarPickedStatus{display:flex;align-items:center;gap:5px;font-size:9px;color:#7fdbe4;margin-top:6px}
+  #solarPickedStatus::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
 
 /* ---------- edu cards: kid-level facts, every line sourced ---------- */
-#eduCard{margin-top:10px;border-top:1px solid rgba(125,214,199,.14);padding-top:10px}
-#eduDeck{display:none;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:9px}
+#eduCard{margin-top:10px;padding:12px 12px 10px;border:1px solid rgba(125,214,199,.18);
+  border-radius:var(--r-md);background:rgba(9,24,38,.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+#eduDeck{counter-reset:deck;display:none;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0 0 11px}
 #eduDeck.open{display:grid}
-#eduDeck button{border:1px solid rgba(125,214,199,.22);background:rgba(125,214,199,.06);
-  color:#dbe7f7;font-size:9.5px;letter-spacing:.8px;padding:7px 4px;border-radius:var(--r-sm);cursor:pointer}
-#eduDeck button:hover{background:rgba(125,214,199,.14);color:#7fdbe4}
+#eduDeck button{counter-increment:deck;display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;
+  border:1px solid rgba(125,214,199,.2);background:rgba(125,214,199,.06);
+  color:#c9dcf5;font-size:9px;letter-spacing:.4px;padding:7px 3px;border-radius:var(--r-sm);cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s}
+#eduDeck button::before{content:counter(deck,decimal-leading-zero);font-size:8px;color:#7fa8d8;font-variant-numeric:tabular-nums}
+#eduDeck button:hover{background:rgba(125,214,199,.16);color:#7fdbe4}
 #eduDeck button.on{background:rgba(127,219,228,.18);color:#9fe8f0;border-color:rgba(127,219,228,.5)}
-#eduHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-#eduName{font-size:12.5px;font-weight:700;letter-spacing:1.2px;color:#f1f7ff;text-transform:uppercase}
-#eduDeckBtn{border:0;background:none;color:#7fdbe4;font-size:9px;letter-spacing:1px;cursor:pointer;padding:2px 0}
-#eduLive{margin-top:5px;font-size:10.5px;color:#9fe8f0;font-variant-numeric:tabular-nums}
-#eduFact{margin-top:7px;font-size:13px;line-height:1.6;color:#eef5ff}
-#eduSrc{margin-top:6px;font-size:9.5px;color:#8fa8c8}
-#eduNav{display:flex;align-items:center;gap:10px;margin-top:9px}
+#eduHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+#eduName{display:flex;flex-direction:column;gap:2px;font-size:12.5px;font-weight:700;
+  letter-spacing:1.2px;color:#f1f7ff;text-transform:uppercase}
+#eduName::before{content:'FACT CARD';font-size:8px;font-weight:600;letter-spacing:1.8px;color:#7fdbe4}
+#eduDeckBtn{border:1px solid rgba(125,214,199,.25);background:rgba(125,214,199,.08);color:#9fe8f0;
+  font-size:8.5px;letter-spacing:.9px;cursor:pointer;padding:5px 8px;border-radius:999px;white-space:nowrap}
+#eduDeckBtn:hover{background:rgba(125,214,199,.18)}
+#eduLive{margin-top:10px;padding:7px 9px;border-radius:var(--r-sm);border:1px solid rgba(125,214,199,.18);
+  background:rgba(45,212,191,.08);color:#9fe8f0;font-size:10.5px;line-height:1.45;font-variant-numeric:tabular-nums}
+#eduLive.off{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);color:var(--muted)}
+#eduFact{position:relative;margin-top:12px;padding-left:11px;font-size:13px;line-height:1.6;color:#eef5ff}
+#eduFact::before{content:'';position:absolute;left:0;top:2px;bottom:2px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2))}
+#eduSrc{margin-top:10px;padding-top:8px;border-top:1px dashed rgba(125,214,199,.16);
+  font-size:9px;letter-spacing:.3px;color:#8fa8c8}
+#eduNav{display:grid;grid-template-columns:36px 1fr 36px;align-items:center;gap:8px;margin-top:12px}
 #eduNav button{border:1px solid rgba(125,214,199,.25);background:rgba(125,214,199,.07);color:#dbe7f7;
-  font-size:11px;width:34px;height:28px;border-radius:var(--r-sm);cursor:pointer}
-#eduNav button:hover{background:rgba(125,214,199,.16);color:#7fdbe4}
-#eduCount{font-size:10px;color:#8fa8c8;font-variant-numeric:tabular-nums}
+  font-size:12px;width:36px;height:36px;border-radius:50%;cursor:pointer;transition:background .15s,border-color .15s}
+#eduNav button:hover{background:rgba(125,214,199,.18);border-color:rgba(125,214,199,.5);color:#7fdbe4}
+#eduCount{position:relative;text-align:center;font-size:9.5px;color:#8fa8c8;font-variant-numeric:tabular-nums}
+#eduCount::before,#eduCount::after{content:'';position:absolute;left:0;bottom:-6px;height:2px;border-radius:2px}
+#eduCount::before{right:0;background:rgba(255,255,255,.08)}
+#eduCount::after{width:var(--edu-progress,33%);background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .25s}
   #solarRetry{display:none;margin:0 0 8px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:rgba(45,212,191,.14);color:#dbe7f7;padding:6px 9px;font-size:9px;letter-spacing:.7px;cursor:pointer}
   #solarRetry.on{display:block}
   #scene canvas{touch-action:none;cursor:grab}
@@ -169,7 +188,7 @@
     body.celestial-mode #topbar{justify-content:space-between;gap:8px}
     body.celestial-mode #clock,body.celestial-mode #aboutBtn,body.celestial-mode #resetCamBtn{display:none}
     body.celestial-mode #focusSel{width:min(48vw,190px);font-size:10px}
-    body.celestial-mode #solarReadout{left:calc(8px + var(--sal));right:calc(8px + var(--sar));top:auto;bottom:calc(10px + var(--sab));width:auto;max-height:27vh;overflow:auto;padding:9px 11px;z-index:18;display:flex;flex-direction:column}
+    body.celestial-mode #solarReadout{left:calc(8px + var(--sal));right:calc(8px + var(--sar));top:auto;bottom:calc(10px + var(--sab));width:auto;max-height:40vh;overflow:auto;padding:9px 11px;z-index:18;display:flex;flex-direction:column}
   body.celestial-mode #solarReadout > h2{order:-2}
   body.celestial-mode #eduCard{order:-1;margin-top:7px}
     body.celestial-mode #solarReadout h2{font-size:10px;margin-bottom:3px}
@@ -2493,9 +2512,11 @@ const EDU_CARDS = {
   ], live(){ const n = Object.keys(planetState.bodies || {}).length; return n ? `${n} bodies riding live NASA/JPL vectors` : null; } },
 };
 let eduKey = null, eduIdx = 0, eduDeckPinned = false;
-function eduLiveText(key) {
+function setEduLiveText(key) {
+  const el = document.getElementById('eduLive');
   const live = EDU_CARDS[key]?.live?.();
-  return live ? live + ' · NASA/JPL live' : 'live number unavailable — awaiting NASA/JPL vectors';
+  el.textContent = live ? live + ' · NASA/JPL live' : 'live number unavailable — awaiting NASA/JPL vectors';
+  el.classList.toggle('off', !live);
 }
 function eduRender() {
   const raw = document.getElementById('focusSel').value;
@@ -2507,8 +2528,10 @@ function eduRender() {
   document.getElementById('eduName').textContent = card.name;
   document.getElementById('eduFact').textContent = facts[eduIdx % facts.length][0];
   document.getElementById('eduSrc').textContent = 'Source: ' + facts[eduIdx % facts.length][1];
-  document.getElementById('eduCount').textContent = (eduIdx % facts.length + 1) + ' / ' + facts.length;
-  document.getElementById('eduLive').textContent = eduLiveText(key);
+  const page = eduIdx % facts.length + 1;
+  document.getElementById('eduCount').textContent = page + ' / ' + facts.length;
+  document.getElementById('eduCount').style.setProperty('--edu-progress', (page / facts.length * 100) + '%');
+  setEduLiveText(key);
   const deck = document.getElementById('eduDeck');
   deck.classList.toggle('open', eduDeckPinned || key === 'solar');
   deck.querySelectorAll('button').forEach(b =>
@@ -2539,7 +2562,7 @@ function eduRender() {
   document.getElementById('eduNext').onclick = () => { eduIdx++; eduRender(); };
   document.getElementById('focusSel').addEventListener('change', () => { eduRender(); });
   eduRender();
-  setInterval(() => { if (eduKey) document.getElementById('eduLive').textContent = eduLiveText(eduKey); }, 5000);
+  setInterval(() => { if (eduKey) setEduLiveText(eduKey); }, 5000);
 })();
 document.getElementById('focusSel').onchange = (e) => {
   const key = e.target.value;
