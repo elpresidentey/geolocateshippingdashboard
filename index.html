@@ -33,7 +33,7 @@
   }
   html,body{height:100%}
   body{background:var(--bg);color:var(--txt);overflow:hidden;-webkit-font-smoothing:antialiased;
-    overscroll-behavior:none;touch-action:manipulation}
+    overscroll-behavior:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   #scene{position:fixed;inset:0}
   canvas{display:block}
   ::selection{background:rgba(45,212,191,.35)}
@@ -95,14 +95,22 @@
     padding:5px 12px;font-size:11px;letter-spacing:1px;cursor:pointer;appearance:none;width:150px;flex:none;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #focusSel option{background:#0a1428;color:#dbe7f7}
-  #solarReadout{display:none;position:fixed;z-index:12;right:20px;top:74px;width:min(260px,calc(100vw - 24px));padding:14px 15px;border-radius:var(--r-lg);background:rgba(7,14,30,.82);backdrop-filter:blur(16px);border:1px solid var(--line-strong);box-shadow:0 18px 50px rgba(0,0,0,.4)}
-  body.celestial-mode #solarReadout{display:block}
+  #solarReadout{display:none;position:fixed;z-index:12;right:20px;top:74px;width:min(260px,calc(100vw - 24px));padding:14px 15px;border-radius:var(--r-lg);background:rgba(7,14,30,.82);backdrop-filter:blur(16px);border:1px solid var(--line-strong);box-shadow:0 18px 50px rgba(0,0,0,.4);flex-direction:column;max-height:calc(100vh - 100px);overflow-y:auto;overscroll-behavior:none}
+  body.celestial-mode #solarReadout{display:flex}
   body.celestial-mode #leftcol,body.celestial-mode #rightcol,body.celestial-mode #lanebar,body.celestial-mode #mtabs,
   body.celestial-mode #chips,body.celestial-mode #ticker,body.celestial-mode #hud,body.celestial-mode #onboard{display:none!important}
   #solarReadout h2{font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#bcd6f5;margin-bottom:5px}
   #solarReadout .solar-note{font-size:10px;line-height:1.45;color:var(--muted);margin-bottom:9px}
   #solarSource{font-size:9px;color:#7fdbe4;margin-bottom:8px}
-  #solarRows{display:none;grid-template-columns:1fr;gap:5px 14px;font-size:11px;font-variant-numeric:tabular-nums}
+  /* Fact card first, distance rows after: the curated card was being pushed
+     below the fold by the nine-row list on a desktop screen. */
+  #solarReadout > h2{order:-3}
+  #solarReadout .solar-note{order:-2}
+  #solarSource{order:-1}
+  #solarRetry{order:0}
+  #solarSelected{order:1}
+  #eduCard{order:2}
+  #solarRows{order:3;display:none;grid-template-columns:1fr;gap:5px 14px;font-size:11px;font-variant-numeric:tabular-nums}
   #solarReadout.system-list #solarRows{display:grid}
   .solar-row{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
   #solarRows button{border:0;background:none;padding:0;text-align:left;color:#dbe7f7;font-size:11px;cursor:pointer}
@@ -356,34 +364,37 @@
   /* ---------- lane bar ---------- */
   /* Surface tier: status strips read as flat plates, a step behind the task
      panels so the figure-ground has two distances, not one */
+  /* All nine corridors stay readable at once: a compact nine-column plate
+     instead of a one-lane-at-a-time hidden scroll strip. */
   #lanebar{
-    position:fixed;left:50%;transform:translateX(-50%);bottom:46px;z-index:10;
-    display:flex;align-items:center;gap:8px;padding:8px 12px;
-    max-width:calc(100vw - 720px);overflow-x:auto;white-space:nowrap;
-    background:rgba(10,18,36,.4);backdrop-filter:blur(9px) saturate(130%);
+    position:fixed;left:calc(26px + 332px);right:calc(26px + 332px);bottom:46px;z-index:10;
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;
+    max-height:36vh;overflow-y:auto;
+    padding:8px 12px;
+    background:rgba(10,18,36,.5);backdrop-filter:blur(9px) saturate(130%);
     -webkit-backdrop-filter:blur(9px) saturate(130%);
     box-shadow:0 10px 26px rgba(0,0,0,.4);
   }
-  #lanebar::-webkit-scrollbar{height:4px}
-  #lanebar{scrollbar-width:thin}
-  #lanebar .lanebar-title{font-size:9.5px;letter-spacing:1.8px;color:var(--muted);flex:none}
-  #lanebar .lanebar-title b{color:#dceaff}
-  #legendList{display:flex;gap:6px;overflow-x:auto}
-  #lanebar .lane{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:var(--r-sm);cursor:pointer;
-    font-size:10.5px;color:#b6cdf0;border:1px solid transparent;transition:background .15s,opacity .2s;flex:none}
+  #lanebar .lanebar-title{grid-column:1/-1;display:flex;align-items:baseline;gap:6px;
+    font-size:9.5px;letter-spacing:1.6px;color:var(--muted)}
+  #lanebar .lanebar-title b{color:#dceaff;font-variant-numeric:tabular-nums}
+  #lanebar .lanebar-title .hint{margin-left:auto;font-size:9px;letter-spacing:.6px;color:#6f8bb5}
+  #legendList{display:contents}
+  #lanebar .lane{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;
+    align-items:center;gap:2px 8px;padding:6px 8px;border-radius:var(--r-sm);cursor:pointer;
+    border:1px solid transparent;transition:background .15s,opacity .2s;min-width:0}
   #lanebar .lane:hover{background:rgba(125,214,199,.08)}
+  #lanebar .lane:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   #lanebar .lane.isolated{background:rgba(45,212,191,.13);border-color:rgba(125,214,199,.28)}
   #lanebar .lane.dimmed{opacity:.32}
-  #lanebar .isolate{font-size:9px;letter-spacing:1px;text-transform:uppercase;
-    background:rgba(24,58,52,.8);border:1px solid var(--line-strong);color:#9fc0e8;border-radius:var(--r-sm);padding:2px 7px;cursor:pointer;opacity:.55}
-  #lanebar .lane:hover .isolate,#lanebar .lane.isolated .isolate{opacity:1}
-  #lanebar .lane.isolated .isolate{background:var(--accent);color:#fff}
-  #lanebar .swatch{width:14px;height:3px;border-radius:2px;box-shadow:0 0 8px currentColor}
-  #lanebar .lane-tally{font-size:10px;letter-spacing:.5px;color:#dceaff;flex:none;
+  #lanebar .swatch{grid-column:1/-1;width:100%;height:3px;border-radius:2px;box-shadow:0 0 8px currentColor}
+  #lanebar .lbl{grid-column:1/-1;min-width:0;font-size:10px;color:#b6cdf0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #lanebar .lane-tally{grid-column:1;font-size:10px;letter-spacing:.4px;color:#dceaff;
     font-variant-numeric:tabular-nums;white-space:nowrap}
   #lanebar .lane-tally b{font-weight:700}
-  #lanebar .lane-bar{width:34px;height:3px;border-radius:2px;
-    background:rgba(255,255,255,.09);overflow:hidden;flex:none}
+  #lanebar .lane-bar{grid-column:2;width:34px;height:3px;border-radius:2px;
+    background:rgba(255,255,255,.09);overflow:hidden}
   #lanebar .lane-bar i{display:block;height:100%;border-radius:2px;opacity:.9;transition:width .6s}
   #lanebar .lane.asleep .lbl{opacity:.62}
   
@@ -488,6 +499,7 @@
   .pills{flex-wrap:nowrap}
   @media (max-width:1280px){
     #leftcol,#rightcol{width:300px}
+    #lanebar{left:calc(26px + 300px);right:calc(26px + 300px)}
     /* The chip strip is as wide as the gutter allows, which at these widths
        is wider than the gap between the columns. Start the columns below it
        so no chip sits on a panel header. */
@@ -504,8 +516,8 @@
   }
   @media (max-width:1080px){
     #leftcol,#rightcol{width:280px}
+    #lanebar{left:calc(26px + 280px);right:calc(26px + 280px);grid-template-columns:repeat(4,minmax(0,1fr))}
     #hud{display:none}
-    #lanebar{max-width:calc(100vw - 600px)}
   }
   @media (max-width:900px){
     .pills{display:none}
@@ -537,7 +549,34 @@
     #chips::-webkit-scrollbar{display:none}
     .chip{padding:10px 15px}
     .chip input{width:14px;height:14px;pointer-events:none}  /* the pill is the target */
-    #lanebar,#hud{display:none}
+    /* Blurred glass is the most expensive effect on a phone. Opaque panels
+       read almost the same and composite far cheaper while scrolling. */
+    .glass,.panel,.kpi,#lanebar,#mtabs button{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+    .glass,.panel{background:var(--glass-2)}
+    .kpi{background:rgba(8,20,22,.86)}
+    #lanebar{background:rgba(8,16,32,.9)}
+    #kpis,#lanebar,#shipments,#solarReadout{overscroll-behavior:none}
+    #hud{display:none}
+
+    /* Corridors stay reachable on a phone as a one-finger strip above the
+       sheet tabs. Opening a drawer hides it so the sheet owns the space. */
+    #lanebar{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;
+      left:0;right:0;transform:none;bottom:calc(102px + var(--sab));
+      width:auto;max-width:none;max-height:none;overflow-x:auto;overflow-y:hidden;
+      padding:6px calc(8px + var(--sar)) 6px calc(8px + var(--sal));
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;
+      mask-image:linear-gradient(to right,#000 92%,transparent);
+      -webkit-mask-image:linear-gradient(to right,#000 92%,transparent)}
+    #lanebar::-webkit-scrollbar{display:none}
+    #legendList{display:flex;flex:0 0 auto;gap:6px}
+    #lanebar .lanebar-title{flex:none}
+    #lanebar .lanebar-title .hint{display:none}
+    #lanebar .lane{flex:0 0 auto;width:158px;display:flex;align-items:center;gap:6px;padding:6px 8px}
+    #lanebar .swatch{width:14px;flex:none}
+    #lanebar .lbl{flex:1;font-size:10px}
+    #lanebar .lane-tally{font-size:9.5px}
+    #lanebar .lane-bar{width:26px}
+    body.sheet-open #lanebar{opacity:0;pointer-events:none;transition:opacity .15s}
 
     /* Telemetry strip: one scrollable row pinned under the chips.
        The chips row is 47px tall under the 56px bar, so the strip starts at
@@ -733,7 +772,7 @@
 </div>
 
 <div id="lanebar" class="glass">
-  <span class="lanebar-title">LANES · <b id="laneCount">9</b></span>
+  <span class="lanebar-title">LANES · <b id="laneCount">9</b> · <b id="laneLive">0 live</b><span class="hint">tap a lane to isolate</span></span>
   <div id="legendList"></div>
 </div>
 
@@ -903,6 +942,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// Phone layout also gets a lighter render budget: the globe keeps its detail
+// where it matters and drops the per-pixel cost that buys nothing on a 5-inch
+// display. Desktop is untouched.
+const PHONE = matchMedia('(max-width:820px)').matches;
+
 /* ============================================================
    Texture sources. Earth's day/night/cloud maps come from three.js
    (CORS enabled). The other maps are bundled under /textures: the
@@ -922,9 +966,9 @@ function loadTex(url) {
 /* ============================================================
    Renderer / Scene / Camera
    ============================================================ */
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: !PHONE, powerPreference: 'high-performance' });
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, PHONE ? 1.5 : 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
@@ -1054,16 +1098,16 @@ if (nightTex) {
       `);
   };
 }
-const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R, 96, 96), earthMat);
+const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R, PHONE ? 64 : 96, PHONE ? 64 : 96), earthMat);
 earthTilt.add(earthMesh);
 
-const clouds = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R + 0.045, 72, 72),
+const clouds = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R + 0.045, PHONE ? 56 : 72, PHONE ? 56 : 72),
   new THREE.MeshPhongMaterial({ map: cloudTex, color: 0xffffff, transparent: true,
     opacity: cloudTex ? 0.72 : 0, depthWrite: false }));
 earthTilt.add(clouds);
 
 // Rim-only atmosphere glow (front-side fresnel shell, additive)
-const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R + 0.13, 96, 96),
+const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R + 0.13, PHONE ? 64 : 96, PHONE ? 64 : 96),
   new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, side: THREE.FrontSide, blending: THREE.AdditiveBlending,
     uniforms: { glow: { value: new THREE.Color(0x3f86ff) }, power: { value: 3.2 }, strength: { value: 1.05 } },
@@ -1100,7 +1144,7 @@ const moonOrbitPath = new THREE.LineLoop(new THREE.BufferGeometry(), new THREE.L
 }));
 moonOrbit.add(moonOrbitPath);
 const MOON_RADIUS_KM = 1737.4;
-const moon = new THREE.Mesh(new THREE.SphereGeometry(MOON_RADIUS_KM * EARTH_R / EARTH_KM, 48, 48),
+const moon = new THREE.Mesh(new THREE.SphereGeometry(MOON_RADIUS_KM * EARTH_R / EARTH_KM, PHONE ? 32 : 48, PHONE ? 32 : 48),
   new THREE.MeshPhongMaterial({ map: moonTex, color: moonTex ? 0xffffff : 0xcccccc, shininess: 4 }));
 // A gentle mean-orbit position is only used until the first JPL response.
 moon.position.set(384400 * EARTH_R / EARTH_KM, 0, 0);
@@ -1675,17 +1719,17 @@ const routeGroup = new THREE.Group(); earthTilt.add(routeGroup);
 const lanes = [];
 
 const markerGeo = new THREE.SphereGeometry(0.055, 12, 12);
-const portHaloTex = radialTexture(['rgba(255,255,255,1)', 'rgba(125,211,252,0.4)', 'rgba(125,211,252,0)']);
+const portHaloTex = radialTexture(['rgba(150,215,255,0.42)', 'rgba(125,211,252,0.16)', 'rgba(125,211,252,0)']);
 ports.forEach(p => {
   const pos = unitVector(p.lat, p.lon).multiplyScalar(EARTH_R + 0.075);
   const ngColor = 0x4ade80;
   const c = p.ng ? ngColor : 0x7dd3fc;
   const marker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: c }));
-  marker.scale.setScalar(p.ng ? 1.5 : 1);
+  marker.scale.setScalar(p.ng ? 1.2 : 0.85);
   marker.position.copy(pos); routeGroup.add(marker);
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: portHaloTex, color: c,
-    transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }));
-  halo.scale.set(p.ng ? 0.6 : 0.45, p.ng ? 0.6 : 0.45, 1); halo.position.copy(pos);
+    transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending }));
+  halo.scale.set(p.ng ? 0.34 : 0.26, p.ng ? 0.34 : 0.26, 1); halo.position.copy(pos);
   routeGroup.add(halo);
 });
 
@@ -1776,7 +1820,11 @@ function addSeaRoute(def) {
   const positions = def.pts.map(([lon, lat]) => unitVector(lat, lon).multiplyScalar(SURFACE_R + 0.05));
   const rough = new THREE.CatmullRomCurve3(positions, false, 'centripetal', 0.5);
   const pts = rough.getPoints(240).map(p => p.clone().setLength(SURFACE_R + 0.05));
-  const lane = { name: def.name, color: def.color, pts, count: 0, multiplier: 1, strands: [] };
+  // Real great-circle length of the drawn centre line, used in the lane's
+  // tooltip so the reader can judge what a "corridor" actually spans.
+  let lengthKm = 0;
+  for (let i = 1; i < pts.length; i++) lengthKm += pts[i - 1].angleTo(pts[i]) * EARTH_KM;
+  const lane = { name: def.name, color: def.color, pts, lengthKm, count: 0, multiplier: 1, strands: [] };
   lane.flat = new Float32Array(3 * pts.length);
   pts.forEach((q, i) => {
     lane.flat[3*i] = q.x / SURFACE_R;
@@ -1813,29 +1861,47 @@ function addSeaRoute(def) {
 }
 SEA_ROUTES.forEach(addSeaRoute);
 
+/* A vessel belongs to exactly one corridor: the nearest one within the tally
+   radius. Counting it for every lane it happened to pass near inflated the
+   shared approaches (Singapore, Suez) and made the nine tallies add up to more
+   vessels than the feed actually reported. Comparing cosines of the angular
+   distance avoids a per-vessel acos and keeps this cheap on a phone. */
+const LANE_NEAR_COS = Math.cos(LANE_TALLY_KM / EARTH_KM);
+let laneLiveAssigned = 0;
+function nearestLane(p) {
+  let best = LANE_NEAR_COS, idx = -1;
+  for (let li = 0; li < lanes.length; li++) {
+    const flat = lanes[li].flat;
+    let d = -1;
+    for (let i = 0; i < flat.length; i += 3) {
+      const dot = flat[i] * p.x + flat[i+1] * p.y + flat[i+2] * p.z;
+      if (dot > d) d = dot;
+    }
+    if (d > best) { best = d; idx = li; }
+  }
+  return idx;
+}
 function updateLaneTallies(list) {
   for (const lane of lanes) lane.count = 0;
+  let assigned = 0;
   for (const vessel of list) {
-    const p = unitVector(vessel.lat, vessel.lon);
-    for (const lane of lanes) {
-      let best = -1;
-      for (let i = 0; i < lane.flat.length; i += 3) {
-        const d = lane.flat[i]*p.x + lane.flat[i+1]*p.y + lane.flat[i+2]*p.z;
-        if (d > best) best = d;
-      }
-      if (best > 0 && Math.acos(Math.min(1, best)) * EARTH_KM <= LANE_TALLY_KM) lane.count++;
-    }
+    const idx = nearestLane(unitVector(vessel.lat, vessel.lon));
+    vessel._lane = idx;               // the vessel row can name its corridor
+    if (idx >= 0) { lanes[idx].count++; assigned++; }
   }
+  laneLiveAssigned = assigned;
   renderLaneTallies();
 }
 
 function setLaneMood(lane) {
-  const mood = lane.count === 0 ? { lit: 2, spine: 0.13, side: 0.05 }
-    : lane.count < 10 ? { lit: 3, spine: 0.34, side: 0.17 }
-    : { lit: 3, spine: 0.50, side: 0.24 };
+  // A phone only needs the lit spine (and one side strand when busy).
+  const lit = lane.count === 0 ? 1 : (lane.count < 10 ? 2 : 2);
+  const level = lane.count === 0 ? { spine: 0.13, side: 0.05 }
+    : lane.count < 10 ? { spine: 0.34, side: 0.17 }
+    : { spine: 0.50, side: 0.24 };
   lane.strands.forEach((strand, i) => {
-    strand.uniforms.uOpacity.value = (strand.spine ? mood.spine : mood.side) * lane.multiplier;
-    strand.mesh.visible = i < mood.lit;
+    strand.uniforms.uOpacity.value = (strand.spine ? level.spine : level.side) * lane.multiplier;
+    strand.mesh.visible = i < (PHONE ? Math.min(lit, 2) : lit + 1);
   });
 }
 
@@ -1852,6 +1918,7 @@ function renderLaneTallies() {
     row.classList.toggle('asleep', lane.count === 0);
   });
   document.getElementById('laneCount').textContent = withTraffic + '/' + lanes.length;
+  document.getElementById('laneLive').textContent = laneLiveAssigned + ' live';
 }
 /* ============================================================
    DASHBOARD UI
@@ -1863,6 +1930,7 @@ function renderLaneTallies() {
    ============================================================ */
 const AIS_ENDPOINT = '/api/vessels';
 const VESSEL_POOL = 150;
+const VESSEL_RENDER_MAX = PHONE ? 100 : VESSEL_POOL;   // instanced markers, no per-ship draw calls
 const AIS_POLL_MS = 60000;
 
 let liveVessels = [];
@@ -1874,7 +1942,41 @@ let watchLocations = [];
 let fireObservations = [];
 let fireState = { configured: false, source: '', message: '' };
 let aisState = { configured: null, lastOk: 0, message: '' };
-const vesselMeshes = [];
+// One InstancedMesh for the dots, one for the course arrows, one Points cloud
+// for the glows. Previously each vessel was a Group of three meshes — up to
+// 450 draw calls on a phone, which is where the frame rate went. Now the whole
+// fleet costs three draw calls regardless of how many ships report.
+let vesselDots = null, vesselArrows = null, vesselGlows = null;
+const _vPos = new THREE.Vector3(), _vQuat = new THREE.Quaternion(),
+      _vScale = new THREE.Vector3(1, 1, 1), _vMat = new THREE.Matrix4(),
+      _vColor = new THREE.Color(), _vUp = new THREE.Vector3(0, 1, 0),
+      _vAhead = new THREE.Vector3();
+
+function buildVesselLayer() {
+  if (vesselDots) return;
+  vesselDots = new THREE.InstancedMesh(new THREE.SphereGeometry(0.038, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xffffff }), VESSEL_RENDER_MAX);
+  vesselArrows = new THREE.InstancedMesh(new THREE.ConeGeometry(0.028, 0.075, 6),
+    new THREE.MeshBasicMaterial({ color: 0xffffff }), VESSEL_RENDER_MAX);
+  const glowGeo = new THREE.BufferGeometry();
+  glowGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(VESSEL_RENDER_MAX * 3), 3));
+  glowGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(VESSEL_RENDER_MAX * 3), 3));
+  vesselGlows = new THREE.Points(glowGeo, new THREE.PointsMaterial({
+    map: shipGlowTex, size: 0.34, sizeAttenuation: true, vertexColors: true,
+    transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }));
+  for (const m of [vesselDots, vesselArrows]) {
+    m.setColorAt(0, _vColor.setHex(0xffffff));   // allocate the instanceColor buffer
+    m.count = 0;
+    m.frustumCulled = false;
+    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    m.instanceColor.setUsage(THREE.DynamicDrawUsage);
+    earthTilt.add(m);
+  }
+  vesselGlows.frustumCulled = false;
+  vesselGlows.geometry.setDrawRange(0, 0);
+  vesselGlows.visible = !PHONE;   // sprite overdraw is the first thing to drop on a phone
+  earthTilt.add(vesselGlows);
+}
 
 function vesselColor(v) {
   const t = v.type;
@@ -1890,54 +1992,49 @@ function vesselLabel(v) {
   return (v.name && v.name !== 'UNKNOWN') ? v.name : `MMSI ${v.mmsi}`;
 }
 
-function buildVesselLayer(n) {
-  while (vesselMeshes.length < Math.min(n, VESSEL_POOL)) {
-    const g = new THREE.Group();
-    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 8),
-      new THREE.MeshBasicMaterial({ color: 0xffffff }));
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: shipGlowTex, color: 0xffffff, transparent: true,
-      opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }));
-    glow.scale.set(0.34, 0.34, 1);
-    const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.075, 6),
-      new THREE.MeshBasicMaterial({ color: 0xffffff }));
-    arrow.position.y = 0.055;
-    g.add(dot, glow, arrow);
-    g.visible = false;
-    earthTilt.add(g);
-    vesselMeshes.push({ group: g, dot, glow, arrow });
-  }
-}
-
 function updateVesselPositions(list) {
-  buildVesselLayer(list.length);
-  const up = new THREE.Vector3(0, 1, 0);
-  vesselMeshes.forEach((m, i) => {
+  buildVesselLayer();
+  const n = Math.min(list.length, VESSEL_RENDER_MAX);
+  const posAttr = vesselGlows.geometry.attributes.position;
+  const colAttr = vesselGlows.geometry.attributes.color;
+  for (let i = 0; i < n; i++) {
     const v = list[i];
-    if (!v) { m.group.visible = false; return; }
-    m.group.position.copy(unitVector(v.lat, v.lon).multiplyScalar(SURFACE_R + 0.02));
-    m.group.visible = true;
-    const c = vesselColor(v);
-    m.dot.material.color.setHex(c);
-    m.glow.material.color.setHex(c);
-    m.arrow.material.color.setHex(c);
-    // orient the cone along the vessel's reported course, computed as the
-    // true initial bearing to a point ~2 km ahead on the great circle —
-    // equal lat/lon offsets would skew the needle by ~1/cos(lat) at high latitudes
+    _vPos.copy(unitVector(v.lat, v.lon).multiplyScalar(SURFACE_R + 0.02));
+    _vColor.setHex(vesselColor(v));
+    vesselDots.setMatrixAt(i, _vMat.compose(_vPos, _vQuat.identity(), _vScale.set(1, 1, 1)));
+    vesselDots.setColorAt(i, _vColor);
+    posAttr.setXYZ(i, _vPos.x, _vPos.y, _vPos.z);
+    colAttr.setXYZ(i, _vColor.r, _vColor.g, _vColor.b);
+    // The arrow points along the reported course: the initial bearing to a
+    // point 2 km ahead on the great circle (lat offsets skew at high latitudes).
+    let hasCourse = false;
     if (v.course != null && isFinite(v.course)) {
-      const C = v.course * Math.PI / 180;
-      const dRad = 2 / EARTH_KM;                     // 2 km ahead, in radians
+      const C = v.course * Math.PI / 180, dRad = 2 / EARTH_KM;
       const l1 = v.lat * Math.PI / 180, o1 = v.lon * Math.PI / 180;
       const lat2 = Math.asin(Math.sin(l1) * Math.cos(dRad)
                  + Math.cos(l1) * Math.sin(dRad) * Math.cos(C));
-      const lon2 = o1 + Math.atan2(
-        Math.sin(C) * Math.sin(dRad) * Math.cos(l1),
+      const lon2 = o1 + Math.atan2(Math.sin(C) * Math.sin(dRad) * Math.cos(l1),
         Math.cos(dRad) - Math.sin(l1) * Math.sin(lat2));
-      const ahead = unitVector(lat2 * 180 / Math.PI, lon2 * 180 / Math.PI)
-        .multiplyScalar(SURFACE_R + 0.02);
-      m.arrow.quaternion.setFromUnitVectors(up, ahead.sub(m.group.position).normalize());
+      _vAhead.copy(unitVector(lat2 * 180 / Math.PI, lon2 * 180 / Math.PI)
+        .multiplyScalar(SURFACE_R + 0.02)).sub(_vPos).normalize();
+      _vQuat.setFromUnitVectors(_vUp, _vAhead);
+      hasCourse = true;
+    } else {
+      _vQuat.identity();   // no course reported: no arrow, never a invented heading
     }
-  });
+    _vScale.setScalar(hasCourse ? 1 : 0);
+    vesselArrows.setMatrixAt(i, _vMat.compose(_vPos, _vQuat, _vScale));
+    vesselArrows.setColorAt(i, _vColor);
+  }
+  vesselDots.count = n;
+  vesselArrows.count = n;
+  vesselGlows.geometry.setDrawRange(0, n);
+  vesselDots.instanceMatrix.needsUpdate = true;
+  vesselArrows.instanceMatrix.needsUpdate = true;
+  vesselDots.instanceColor.needsUpdate = true;
+  vesselArrows.instanceColor.needsUpdate = true;
+  posAttr.needsUpdate = true;
+  colAttr.needsUpdate = true;
 }
 
 let shipFilter = 'all';
@@ -1983,6 +2080,8 @@ function renderVesselList(list) {
     const age = v.timestamp ? Math.max(0, Math.round(now - v.timestamp)) : null;
     const ageTxt = age == null ? 'position age unknown'
       : (age < 90 ? 'position current' : 'position ' + Math.round(age / 60) + ' min old');
+    const corridor = v._lane >= 0 && lanes[v._lane]
+      ? ` · corridor: ${esc(lanes[v._lane].name)}` : ' · outside a charted corridor';
     return `
     <div class="ship" data-vessel="${i}">
       <div class="top">
@@ -1990,7 +2089,7 @@ function renderVesselList(list) {
         <span class="name">${esc(vesselLabel(v))}</span>
         <span class="eta">${kn != null ? kn.toFixed(1) + ' knots' : 'no AIS'}</span>
       </div>
-      <div class="lane" title="MMSI — the ship's radio ID, broadcast with its position">${fmtLatLon(v.lat, v.lon)} · ID ${esc(String(v.mmsi))}</div>
+      <div class="lane" title="MMSI — the ship's radio ID, broadcast with its position${corridor}">${fmtLatLon(v.lat, v.lon)} · ID ${esc(String(v.mmsi))}</div>
       <div class="prog ${tag}"><i style="width:${kn != null ? Math.min(100, kn / 25 * 100) : 0}%"></i></div>
       <div class="eta age">${ageTxt}</div>
     </div>`;
@@ -2042,16 +2141,16 @@ async function loadVessels() {
     }
     if (feedEvent !== lastFeedEvent) { lastFeedEvent = feedEvent; logEvent(feedEvent); }
     updateVesselPositions(liveVessels);
+    updateLaneTallies(liveVessels);   // assign corridors before the rows are drawn
     renderVesselList(liveVessels);
-    updateLaneTallies(liveVessels);   // corridor styles/badges follow the feed
     renderTicker();                  // the AIS event-line follows the feed state
   } catch (err) {
     liveVessels = [];
     aisState.message = 'AIS endpoint failed: ' + (err.message || 'network error');
     setPill('pillAis', 'bad', 'AIS offline');
     updateVesselPositions([]);
-    renderVesselList([]);
     updateLaneTallies([]);            // no feed, no claimed traffic
+    renderVesselList([]);
     renderTicker();
     const feedEvent = `<b>Live AIS</b> — offline · ${esc(aisState.message)} · lane geometry is real`;
     if (feedEvent !== lastFeedEvent) { lastFeedEvent = feedEvent; logEvent(feedEvent); }
@@ -2158,12 +2257,13 @@ function deriveAlertsFrom(iss, ports) {
 
 const legend = SEA_ROUTES.map((r, i) => {
   const c = '#' + r.color.toString(16).padStart(6, '0');
-  return `<div class="lane" data-lane="${i}" role="button" title="Click to isolate this lane">` +
+  const km = Math.round(lanes[i].lengthKm / 100) * 100;
+  return `<div class="lane" data-lane="${i}" role="button" tabindex="0" aria-pressed="false"` +
+    ` title="${esc(r.name)} · about ${km.toLocaleString('en-US')} km of charted centre line · tap to isolate">` +
     `<i class="swatch" style="background:${c};color:${c}"></i>` +
-    `<span class="lbl">${r.name}</span>` +
+    `<span class="lbl">${esc(r.name)}</span>` +
     `<span class="lane-tally"><b data-laneCount>0</b> live</span>` +
-    `<span class="lane-bar"><i data-laneBar style="width:0%;background:${c}"></i></span>` +
-    `<button class="isolate" data-iso="${i}">isolate</button></div>`;
+    `<span class="lane-bar"><i data-laneBar style="width:0%;background:${c}"></i></span></div>`;
 }).join('');
 document.getElementById('legendList').innerHTML = legend;
 renderLaneTallies();       // first paint: all corridors asleep until the feed polls
@@ -2179,11 +2279,17 @@ function setIsolate(idx) {
   document.querySelectorAll('#legendList .lane').forEach((el, i) => {
     el.classList.toggle('isolated', i === isolated);
     el.classList.toggle('dimmed', isolated !== null && i !== isolated);
-    el.querySelector('.isolate').textContent = i === isolated ? 'show all' : 'isolate';
+    el.setAttribute('aria-pressed', String(i === isolated));
   });
 }
 document.querySelectorAll('#legendList .lane').forEach((el, i) => {
   el.onclick = () => setIsolate(i);
+  el.onkeydown = e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsolate(i); }
+  };
+});
+addEventListener('keydown', e => {
+  if (e.key === 'Escape' && isolated !== null) setIsolate(isolated);
 });
 
 // Current Sun-centered JPL vectors, interpolated with their reported velocity
@@ -3499,6 +3605,14 @@ function solarGeometry() {
                 - Math.atan2(sinL * Math.cos(OBLSQ), cosL);
   return { decl, eot, subLon, lambda, spinRad };
 }
+// The terminator only changes on a second boundary; recomputing trig and an
+// object every frame bought nothing but GC churn on mobile.
+let solarCache = { sec: -1, value: null };
+function solarGeometryNow() {
+  const sec = Math.floor(Date.now() / 1000);
+  if (solarCache.sec !== sec) { solarCache.sec = sec; solarCache.value = solarGeometry(); }
+  return solarCache.value;
+}
 
 loadISS();
 updatePlanetDisplay(Date.now()); // cached last-known vectors remain usable while the live refresh loads
@@ -3527,6 +3641,7 @@ const clock = new THREE.Clock();
 let fpsAcc = 0, fpsFrames = 0;
 let realTimeOn = true;
 let subsolarAt = 0;
+let moonEarthUiAt = 0;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -3549,7 +3664,7 @@ function animate() {
   // exactly the geographic point facing the Sun. Declination and longitude in
   // the tiles and the drawn terminator now come from one shared source.
   if (realTimeOn) {
-    const s = solarGeometry();
+    const s = solarGeometryNow();
     const lam = s.lambda * Math.PI / 180;
     sunDirUniform.value.set(Math.cos(lam), 0, Math.sin(lam));
     sunLight.position.copy(sunDirUniform.value).multiplyScalar(70);
@@ -3572,8 +3687,13 @@ function animate() {
 
   // JPL Horizons supplies a geocentric position and velocity. The velocity
   // advances the Moon smoothly between its one-minute ephemeris refreshes.
-  updateMoonDisplay(Date.now());
-  updatePlanetDisplay(Date.now());
+  // Planet geometry and the 3D Moon are only needed in a celestial view; the
+  // Moon tile still refreshes twice a second on Earth so its range stays live.
+  const celestial = document.body.classList.contains('celestial-mode');
+  const nowMs = Date.now();
+  if (celestial) updateMoonDisplay(nowMs);
+  else if (nowMs - moonEarthUiAt > 500) { moonEarthUiAt = nowMs; updateMoonDisplay(nowMs); }
+  if (celestial) updatePlanetDisplay(nowMs);
 
   jupiter.rotation.y += dt * 0.08;
   saturn.rotation.y  += dt * 0.07;
@@ -3585,8 +3705,9 @@ function animate() {
 
   // Live vessels are re-placed on each AIS poll, not animated between polls,
   // so no vessel appears to move without a position report to justify it.
-  for (const m of vesselMeshes) {
-    if (m.group.visible) m.glow.material.opacity = 0.55 + 0.2 * Math.sin(t * 3);
+  // Only the shared glow opacity pulses — one material for the whole fleet.
+  if (vesselGlows && vesselGlows.visible) {
+    vesselGlows.material.opacity = 0.55 + 0.2 * Math.sin(t * 3);
   }
 
   // Lane-ribbon dash flow (style only — the sourced traffic is the vessel
@@ -3658,6 +3779,8 @@ function showSheet(which) {
     b.classList.toggle('on', on);
     b.setAttribute('aria-selected', String(on));
   });
+  document.body.classList.toggle('sheet-open',
+    phone && (leftcol.classList.contains('open') || rightcol.classList.contains('open')));
   // the globe gets more room when nothing is open: pull the camera in
   fitGlobe();
 }
