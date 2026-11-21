@@ -203,18 +203,29 @@
   }
 
   /* ---------- KPI tiles ---------- */
-  /* Every source line reserves two rows, so a one-line caption and a
-     two-line caption keep their meters on the same baseline. */
-  .kpi{padding:12px 14px;border-radius:var(--r-lg)}
-  .kpi .lbl{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
-  .kpi .val{font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:3px;font-variant-numeric:tabular-nums}
-  .kpi .val small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px}
-  .kpi .delta{font-size:10px;letter-spacing:.6px;margin-top:2px;line-height:1.4;min-height:2.8em}
+  /* A tile is a small instrument: provenance on top, reading in the middle,
+     source caption below, meter pinned to the bottom. Grid rows equalise the
+     height, so meters align without reserving a blank caption line. */
+  .kpi{padding:10px 13px;border-radius:var(--r-lg);display:flex;flex-direction:column;min-height:100px}
+  .kpi::after{content:'';position:absolute;left:13px;right:13px;top:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(125,214,199,.45),transparent)}
+  .kpi .lbl{display:flex;align-items:center;justify-content:space-between;gap:6px;
+    font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+  .kpi .tag{flex:none;border:1px solid rgba(125,214,199,.2);border-radius:999px;
+    padding:1px 5px;font-size:8px;letter-spacing:.9px;color:rgba(127,219,228,.75)}
+  .kpi .val{font-size:25px;font-weight:700;letter-spacing:.2px;margin-top:4px;
+    font-variant-numeric:tabular-nums;line-height:1.1}
+  .kpi .val small{font-size:12px;font-weight:600;color:var(--muted);margin-left:3px}
+  .kpi .delta{font-size:10px;letter-spacing:.4px;margin-top:4px;line-height:1.4}
   .up{color:var(--ok)} .down{color:var(--bad)}
-  .kpi .delta.src{color:var(--muted);font-size:9.5px;letter-spacing:.4px}
+  .kpi .delta.src{color:var(--muted);font-size:9.5px;letter-spacing:.3px}
   .kpi .delta.src.err{color:var(--warn)}
-  .spark{height:3px;margin-top:8px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden}
+  .spark{height:4px;margin-top:auto;border-radius:2px;overflow:hidden;
+    background:rgba(255,255,255,.07);
+    background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 1px,transparent 1px 25%)}
   .spark i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--ok));transition:width .7s}
+  .kpi.stale::after{background:linear-gradient(90deg,transparent,rgba(255,180,80,.5),transparent)}
+  .kpi.stale .spark i{background:var(--warn)}
   #moonKpi{grid-column:1/-1;display:grid;grid-template-columns:auto auto minmax(60px,1fr);align-items:center;
     gap:2px 12px;text-align:left;font-family:inherit;font-weight:inherit;letter-spacing:normal;color:var(--txt);
     border:1px solid rgba(125,214,199,.2);background:linear-gradient(100deg,rgba(16,30,56,.88),rgba(8,15,30,.78));
@@ -540,15 +551,15 @@
       -webkit-mask-image:linear-gradient(to right,#000 90%,transparent)}
     #kpis::-webkit-scrollbar{display:none}
     #kpiToggle{display:none}
-    .kpi{flex:0 0 auto;width:calc(50vw - 15px);height:72px;padding:7px 9px;overflow:hidden;scroll-snap-align:start}
+    .kpi{flex:0 0 auto;width:calc(50vw - 15px);height:72px;min-height:0;padding:7px 9px;overflow:hidden;scroll-snap-align:start}
+    .kpi .tag{display:none}
     .kpi .lbl{font-size:9.5px;letter-spacing:1px;white-space:nowrap;
       overflow:hidden;text-overflow:ellipsis}
     .kpi .val{font-size:17px}
     .kpi .val small{font-size:10px}
     .kpi .delta.src{font-size:9.5px;white-space:nowrap;
       overflow:hidden;text-overflow:ellipsis}
-    .kpi .delta{min-height:0}
-    .spark{margin-top:5px}
+    .spark{margin-top:auto}
     #moonKpi{display:block;grid-column:auto;padding:7px 9px}
     #moonKpi .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #moonKpi .val{margin-top:3px;font-size:17px}
@@ -690,20 +701,20 @@
     <button id="kpiToggle" type="button" aria-expanded="true"
       title="Park the telemetry tiles and give the globe the room">
       <span>Telemetry</span><i id="kpiChev">&#9662;</i></button>
-    <div class="kpi glass"><div class="lbl">ISS height</div><div class="val" id="tIssAlt">--<small>km</small></div>
+    <div class="kpi glass"><div class="lbl">ISS height<span class="tag">SGP4</span></div><div class="val" id="tIssAlt">--<small>km</small></div>
       <div class="delta src" id="tIssPos">fetching position…</div><div class="spark"><i id="tIssBar" style="width:0%"></i></div></div>
-    <div class="kpi glass"><div class="lbl">ISS speed</div><div class="val" id="tIssVel">--<small>km/h</small></div>
+    <div class="kpi glass"><div class="lbl">ISS speed<span class="tag">SGP4</span></div><div class="val" id="tIssVel">--<small>km/h</small></div>
       <div class="delta src" id="tIssVis">-</div><div class="spark"><i id="tVelBar" style="width:0%"></i></div></div>
-    <div class="kpi glass"><div class="lbl">Lagos</div><div class="val" id="tLagosT">--<small>°C</small></div>
+    <div class="kpi glass"><div class="lbl">Lagos<span class="tag">MODEL</span></div><div class="val" id="tLagosT">--<small>°C</small></div>
       <div class="delta src" id="tLagosW">—</div><div class="spark"><i id="tLagosBar" style="width:0%"></i></div></div>
-    <div class="kpi glass"><div class="lbl">Rotterdam</div><div class="val" id="tRotT">--<small>°C</small></div>
+    <div class="kpi glass"><div class="lbl">Rotterdam<span class="tag">MODEL</span></div><div class="val" id="tRotT">--<small>°C</small></div>
       <div class="delta src" id="tRotW">—</div><div class="spark"><i id="tRotBar" style="width:0%"></i></div></div>
-    <div class="kpi glass" title="Significant wave height — the tallest third of waves — from the marine model for the North Sea off Rotterdam"><div class="lbl">Sea height</div><div class="val" id="tSea">--<small>m</small></div>
+    <div class="kpi glass" title="Significant wave height — the tallest third of waves — from the marine model for the North Sea off Rotterdam"><div class="lbl">Sea height<span class="tag">MARINE</span></div><div class="val" id="tSea">--<small>m</small></div>
       <div class="delta src" id="tSeaSwell">North Sea · model</div><div class="spark"><i id="tSeaBar" style="width:0%"></i></div></div>
-    <div class="kpi glass" title="The subsolar point: where the Sun is exactly overhead right now, computed from UTC"><div class="lbl">Sun overhead at</div><div class="val" id="tSub">--<small>° lat</small></div>
+    <div class="kpi glass" title="The subsolar point: where the Sun is exactly overhead right now, computed from UTC"><div class="lbl">Sun overhead<span class="tag">UTC</span></div><div class="val" id="tSub">--<small>° lat</small></div>
       <div class="delta src" id="tSubDetail">computed from UTC</div><div class="spark"><i id="tSubBar" style="width:0%"></i></div></div>
     <button type="button" class="kpi glass" id="moonKpi" title="Focus the camera on the Moon · live NASA-JPL tracking">
-      <div class="lbl">Moon distance</div><div class="val"><span id="tMoonRange">--</span><small>km</small></div>
+      <div class="lbl">Moon distance<span class="tag">JPL</span></div><div class="val"><span id="tMoonRange">--</span><small>km</small></div>
       <div class="delta src" id="tMoonPhase">NASA-JPL · connecting</div><div class="spark" aria-hidden="true"><i id="tMoonBar" style="width:0%"></i></div>
     </button>
   </section>
@@ -1356,6 +1367,7 @@ async function loadTle(force) {
     tleState.satrec = satrec; tleState.fetchedAt = Date.now();
     if (b.name) tleState.name = String(b.name);
     setPill('pillIss', 'ok', 'ISS live · SGP4');
+    setIssTag('SGP4');
   } catch (err) {
     // Surface why, then stay in the telemetry-anchor mode — but keep trying:
     // without a retry ladder a single failed boot-time fetch (a 429, a
@@ -3081,6 +3093,11 @@ function setTile(id, html, barId, frac) {
   const el = document.getElementById(id);
   if (!el) return;
   el.innerHTML = html;
+  const tile = el.closest('.kpi');
+  if (tile) {
+    tile.classList.remove('stale');
+    tile.querySelector('.delta.err')?.classList.remove('err');
+  }
   if (barId) {
     document.getElementById(barId).style.width =
       (Math.max(0, Math.min(1, frac)) * 100).toFixed(1) + '%';
@@ -3089,7 +3106,19 @@ function setTile(id, html, barId, frac) {
 function failTile(valId, srcId, barId, label) {
   setTile(valId, '--', barId, 0);
   const src = document.getElementById(srcId);
-  if (src) { src.textContent = label; src.classList.add('err'); }
+  if (src) {
+    src.textContent = label;
+    src.classList.add('err');
+    src.closest('.kpi')?.classList.add('stale');
+  }
+}
+// The ISS tiles switch between local SGP4 propagation and the provider's
+// telemetry anchor; keep their provenance tag in step with the active mode.
+function setIssTag(text) {
+  for (const id of ['tIssAlt', 'tIssVel']) {
+    const tag = document.getElementById(id)?.closest('.kpi')?.querySelector('.tag');
+    if (tag) tag.textContent = text;
+  }
 }
 const fmtLatLon = (lat, lon) =>
   `${Math.abs(lat).toFixed(2)}°${lat >= 0 ? 'N' : 'S'} ${Math.abs(lon).toFixed(2)}°${lon >= 0 ? 'E' : 'W'}`;
@@ -3114,6 +3143,7 @@ async function loadISS() {
     // Re-assert the label every pass: after the boot-race fix no path should
     // mislabel it, but the pilot line must never outlive the truth it reports.
     setPill('pillIss', 'ok', 'ISS live · SGP4');
+    setIssTag('SGP4');
     try {
       const r = await fetch('https://api.wheretheiss.at/v1/satellites/25544', { cache: 'no-store' });
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -3154,6 +3184,7 @@ async function loadISS() {
     setIssFromTelemetry(d);
     deriveAlertsFrom(issState.ready ? { ...issState, visibility: issVisibility } : null, observed);
     setPill('pillIss', 'ok', 'ISS live · TLE anchor');
+    setIssTag('TLE');
     if (typeof renderTicker === 'function') renderTicker();
   } catch (err) {
     failTile('tIssAlt', 'tIssPos', 'tIssBar', 'ISS telemetry unavailable');
