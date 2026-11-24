@@ -307,8 +307,17 @@
   .fire-row b{font-size:10px;color:#ffd08c}
   .fire-row small{font-size:9px;color:var(--muted);text-align:right}
   #alerts{position:static;width:auto;flex:1 1 auto;min-height:120px;max-height:none;overflow-y:auto}
-  #leftcol,#rightcol{overflow-y:auto;scrollbar-width:thin}
+  #leftcol,#rightcol{overflow-y:auto;scrollbar-width:thin;
+    scrollbar-color:rgba(125,214,199,.32) transparent}
   #leftcol::-webkit-scrollbar,#rightcol::-webkit-scrollbar{width:3px}
+  #leftcol::-webkit-scrollbar-track,#rightcol::-webkit-scrollbar-track,
+  #alerts::-webkit-scrollbar-track,#solarReadout::-webkit-scrollbar-track{background:transparent}
+  #leftcol::-webkit-scrollbar-thumb,#rightcol::-webkit-scrollbar-thumb,
+  #alerts::-webkit-scrollbar-thumb,#solarReadout::-webkit-scrollbar-thumb{
+    background:rgba(125,214,199,.32);border-radius:2px}
+  #alerts,#solarReadout{scrollbar-width:thin;
+    scrollbar-color:rgba(125,214,199,.32) transparent}
+  #alerts::-webkit-scrollbar,#solarReadout::-webkit-scrollbar{width:3px}
 
   /* ---------- shipment rows ---------- */
   .ship{padding:9px 0;border-bottom:1px dashed rgba(125,214,199,.10);transition:background .15s;border-radius:var(--r-sm)}
@@ -386,7 +395,7 @@
   #lanebar.collapsed #legendList{display:none}
   #lanebar.collapsed .hint{display:none}
   #legendList{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;width:100%}
-  #lanebar .lane{flex:1 1 118px;max-width:155px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;
+  #lanebar .lane{flex:0 0 calc(20% - 5px);max-width:155px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;
     align-items:center;gap:2px 8px;padding:6px 8px;border-radius:var(--r-sm);cursor:pointer;
     border:1px solid transparent;transition:background .15s,opacity .2s;min-width:0}
   #lanebar .lane:hover{background:rgba(125,214,199,.08)}
@@ -525,6 +534,14 @@
     #lanebar{left:calc(26px + 280px);right:calc(26px + 280px)}
     #hud{display:none}
   }
+  /* Between the narrow rails the plate is only ~450px wide; three tiles per
+     row beat five cramped ones. The mini bar yields its space to the count. */
+  @media (min-width:821px) and (max-width:1280px){
+    #lanebar .lane-bar{display:none}
+  }
+  @media (min-width:821px) and (max-width:1080px){
+    #lanebar .lane{flex-basis:calc(33.333% - 4px)}
+  }
   @media (max-width:900px){
     .pills{display:none}
     #hud{display:none}
@@ -567,24 +584,27 @@
     #hud{display:none}
 
     /* Corridors stay reachable on a phone as a one-finger strip above the
-       sheet tabs. Opening a drawer hides it so the sheet owns the space. */
-    #lanebar{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:6px;
+       sheet tabs. A compact header keeps the count and the collapse control
+       out of the scroll row, so the lane cards get the full width. */
+    #lanebar{display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:5px;
       left:0;right:0;transform:none;bottom:calc(102px + var(--sab));
-      width:auto;max-width:none;max-height:none;overflow-x:auto;overflow-y:hidden;
-      padding:6px calc(8px + var(--sar)) 6px calc(8px + var(--sal));
+      width:auto;max-width:none;max-height:none;overflow:visible;
+      padding:6px calc(8px + var(--sar)) 6px calc(8px + var(--sal))}
+    #lanebar .lanebar-title{flex:none;width:100%;gap:6px}
+    #lanebar .lanebar-title .hint{display:none}
+    #laneToggle{margin-left:auto}
+    #legendList{display:flex;flex:0 0 auto;flex-wrap:nowrap;justify-content:flex-start;
+      width:100%;gap:6px;overflow-x:auto;overflow-y:hidden;
       scrollbar-width:none;-webkit-overflow-scrolling:touch;
       mask-image:linear-gradient(to right,#000 92%,transparent);
       -webkit-mask-image:linear-gradient(to right,#000 92%,transparent)}
-    #lanebar::-webkit-scrollbar{display:none}
-    #legendList{display:flex;flex:0 0 auto;flex-wrap:nowrap;justify-content:flex-start;width:auto;gap:6px}
-    #lanebar .lanebar-title{flex:none;width:auto}
-    #lanebar .lanebar-title .hint{display:none}
+    #legendList::-webkit-scrollbar{display:none}
     #lanebar .lane{flex:0 0 auto;width:158px;max-width:none;display:flex;align-items:center;gap:6px;padding:6px 8px}
     #lanebar .swatch{width:14px;flex:none}
     #lanebar .lbl{flex:1;font-size:10px}
     #lanebar .lane-tally{font-size:9.5px}
     #lanebar .lane-bar{width:26px}
-    body.sheet-open #lanebar{opacity:0;pointer-events:none;transition:opacity .15s}
+    body.sheet-open #lanebar{opacity:0;z-index:9;pointer-events:none;transition:opacity .15s}
 
     /* Telemetry strip: one scrollable row pinned under the chips.
        The chips row is 47px tall under the 56px bar, so the strip starts at
@@ -697,6 +717,9 @@
     box-shadow:none;line-height:1}
   #lanebar .lanebar-title{align-items:center}
   #lanebar .lanebar-title .hint{margin-left:auto}
+  @media (max-width:820px){
+    #laneToggle{width:30px;height:26px;font-size:12px}
+  }
   /* The focus menu is a select with appearance:none; give it the same
      chevron language as the other pickers. */
   #focusSel{padding-right:20px;
@@ -704,8 +727,19 @@
       linear-gradient(135deg,#7fb0e8 50%,transparent 50%);
     background-position:calc(100% - 12px) 50%,calc(100% - 8px) 50%;
     background-size:4px 4px,4px 4px;background-repeat:no-repeat}
+  @media (max-width:820px){
+    #focusSel{padding-right:16px;letter-spacing:.2px;
+      background-position:calc(100% - 10px) 50%,calc(100% - 6px) 50%}
+    /* Phones swipe these sheets; a visible desktop scrollbar is just noise. */
+    #leftcol,#rightcol,#solarReadout,#alerts{scrollbar-width:none}
+    #leftcol::-webkit-scrollbar,#rightcol::-webkit-scrollbar,
+    #solarReadout::-webkit-scrollbar,#alerts::-webkit-scrollbar{display:none}
+  }
   /* Keep the HUD clear of the lane plate however tall it grows. */
   #hud{bottom:calc(56px + var(--sab) + var(--lane-h,30px))}
+  /* The UTC readout sits in the same control row as the squared menu and
+     buttons; a lone pill there reads as an oversight. */
+  #clock{border-radius:0!important}
 </style>
 </head>
 <body>
@@ -1767,16 +1801,20 @@ ports.forEach(p => {
 // Port-city labels (canvas sprites, Nigeria highlighted)
 const labelGroup = new THREE.Group(); earthTilt.add(labelGroup);
 const labelWorld = new THREE.Vector3();
+const labelCamDir = new THREE.Vector3();
 function makeLabel(text, color = '#dbe7f7') {
   const c = document.createElement('canvas'); c.width = 512; c.height = 128;
   const g = c.getContext('2d');
   g.font = 'bold 46px Segoe UI';
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.shadowColor = 'rgba(0,0,0,0.9)'; g.shadowBlur = 8;
+  // A crisp dark outline reads better than a soft shadow over the city lights.
+  g.lineJoin = 'round'; g.strokeStyle = 'rgba(2,7,16,0.92)'; g.lineWidth = 7;
+  g.strokeText(text, 256, 64);
   g.fillStyle = color;
   g.fillText(text, 256, 64);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true,
+    depthWrite: false, depthTest: false }));
   sprite.scale.set(1.9, 0.48, 1);
   return sprite;
 }
@@ -2336,6 +2374,7 @@ setLanePlate(localStorage.getItem('ofLanesCollapsed') === '1', false);
 laneToggle.addEventListener('click', e => {
   e.stopPropagation();
   setLanePlate(!lanebarEl.classList.contains('collapsed'), true);
+  if (matchMedia('(max-width:820px)').matches) fitGlobe();
 });
 // The HUD sits above the plate; publish the plate's live height so it moves.
 const publishLaneHeight = () => {
@@ -3802,18 +3841,20 @@ function animate() {
 
   controls.update();
 
-  // Port labels belong to the near hemisphere only. Fading the ones that
-  // face away keeps names at the limb from piling up (Hamburg/Rotterdam/
-  // Dubai) without removing the layer toggle.
-  if (!celestial && labelGroup.visible) {
-    const camDir = camera.position.clone().sub(earthPivot.position).normalize();
+  // Keep labels on the near hemisphere. Sprites no longer depth-test (that
+  // was cropping half a name at the limb), so hide the ones that rotated
+  // behind the planet instead.
+  if (!celestial && labelGroup.visible && !(PHONE && document.body.classList.contains('sheet-open'))) {
+    earthTilt.updateWorldMatrix(true, false);
+    labelCamDir.copy(camera.position).sub(earthPivot.position).normalize();
     for (const label of labelGroup.children) {
-      label.getWorldPosition(labelWorld).sub(earthPivot.position).normalize();
-      const facing = labelWorld.dot(camDir);
-      const fade = Math.min(1, Math.max(0, (facing - 0.04) / 0.18));
-      label.material.opacity = fade;
-      label.visible = fade > 0.02;
+      labelWorld.copy(label.position).applyMatrix4(earthTilt.matrixWorld)
+        .sub(earthPivot.position).normalize();
+      label.visible = labelWorld.dot(labelCamDir) > 0.015;
     }
+  } else if (PHONE && document.body.classList.contains('sheet-open')) {
+    // The globe is small above an open sheet; unreadable labels just add noise.
+    for (const label of labelGroup.children) label.visible = false;
   }
 
   renderer.render(scene, camera);
@@ -3894,11 +3935,23 @@ mtabs.addEventListener('click', e => {
    Solve for the distance that fits Earth's angular radius into whichever axis
    is tighter, with a margin so it never kisses the panel edges. */
 function fitGlobe() {
-  // Focus views use the full canvas. The phone Earth layout applies a view
-  // offset to keep Earth clear of its sheets; carrying that crop into a
-  // planet/Moon/Sun camera can move the target outside the visible frame.
+  // Focus views are framed against the canvas. On a phone the readout sheet
+  // covers the bottom, so apply a view offset that centres the body in the
+  // band above it; desktop keeps the full canvas.
   if (document.body.classList.contains('celestial-mode')) {
-    camera.clearViewOffset();
+    if (PHONE) {
+      const topbar = document.getElementById('topbar').getBoundingClientRect();
+      const readout = document.getElementById('solarReadout').getBoundingClientRect();
+      if (readout.height && readout.top > topbar.bottom) {
+        const visibleCenter = (topbar.bottom + readout.top) / 2;
+        camera.setViewOffset(innerWidth, innerHeight, 0, innerHeight / 2 - visibleCenter,
+          innerWidth, innerHeight);
+      } else {
+        camera.clearViewOffset();
+      }
+    } else {
+      camera.clearViewOffset();
+    }
     camera.updateProjectionMatrix();
     return;
   }
@@ -3937,13 +3990,18 @@ function fitGlobe() {
   // globe centers on the band rather than the raw viewport middle.
   const kpiBox = document.getElementById('kpis').getBoundingClientRect();
   const tabsBox = document.getElementById('mtabs').getBoundingClientRect();
+  const laneBox = document.getElementById('lanebar').getBoundingClientRect();
   const openDrawer = document.querySelector('#leftcol.open, #rightcol.open');
   const drawerBox = openDrawer ? openDrawer.getBoundingClientRect() : null;
   const bandTop = kpiBox.bottom;
-  const bandBot = Math.min(
+  // Fit inside the full band down to the tabs, but aim the globe at the
+  // centre of the space that is actually visible above the corridor strip.
+  const fitBot = Math.min(
     tabsBox.height ? tabsBox.top : innerHeight,
     drawerBox && drawerBox.height ? drawerBox.top : innerHeight);
-  const band = Math.max(bandBot - bandTop, innerHeight * 0.22);
+  const bandBot = Math.max(bandTop, Math.min(fitBot,
+    laneBox.height ? laneBox.top : fitBot));
+  const band = Math.max(fitBot - bandTop, innerHeight * 0.22);
   const vFov = camera.fov * Math.PI / 180;
   const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
   const bandCenter = (bandTop + bandBot) / 2;
@@ -3980,7 +4038,6 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
   showSheet(currentSheet());
   if (document.getElementById('focusSel').value === 'solar') {
-    camera.clearViewOffset(); camera.updateProjectionMatrix();
     const direction = camera.position.clone().normalize();
     if (direction.lengthSq() < 1e-6) direction.set(0.5, 0.7, 0.5);
     const distance = solarOverviewDistance();
@@ -3989,6 +4046,7 @@ addEventListener('resize', () => {
     controls.minDistance = distance * 0.88;
     controls.maxDistance = Math.max(360, distance * 2.2);
     camTween = null; focusOffset.set(0, 0, 0); controls.update();
+    fitGlobe();
   }
 });
 
