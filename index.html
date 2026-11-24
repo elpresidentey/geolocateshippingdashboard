@@ -379,6 +379,12 @@
     font-size:9.5px;letter-spacing:1.6px;color:var(--muted)}
   #lanebar .lanebar-title b{color:#dceaff;font-variant-numeric:tabular-nums}
   #lanebar .lanebar-title .hint{margin-left:auto;font-size:9px;letter-spacing:.6px;color:#6f8bb5}
+  #laneToggle{margin-left:6px;border:1px solid var(--line);background:rgba(125,214,199,.08);
+    color:#9fc0e8;border-radius:var(--r-sm);font-size:10px;line-height:1;padding:3px 7px;cursor:pointer}
+  #laneToggle:hover{border-color:rgba(125,214,199,.5);color:#7fdbe4}
+  #lanebar.collapsed{padding:6px 12px}
+  #lanebar.collapsed #legendList{display:none}
+  #lanebar.collapsed .hint{display:none}
   #legendList{display:contents}
   #lanebar .lane{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;
     align-items:center;gap:2px 8px;padding:6px 8px;border-radius:var(--r-sm);cursor:pointer;
@@ -772,7 +778,7 @@
 </div>
 
 <div id="lanebar" class="glass">
-  <span class="lanebar-title">LANES · <b id="laneCount">9</b> · <b id="laneLive">0 live</b><span class="hint">tap a lane to isolate</span></span>
+  <span class="lanebar-title">LANES · <b id="laneCount">9</b> · <b id="laneLive">0 live</b><span class="hint">tap a lane to isolate</span><button type="button" id="laneToggle" aria-expanded="true" title="Collapse or expand the corridor plate">▾</button></span>
   <div id="legendList"></div>
 </div>
 
@@ -2290,6 +2296,20 @@ document.querySelectorAll('#legendList .lane').forEach((el, i) => {
 });
 addEventListener('keydown', e => {
   if (e.key === 'Escape' && isolated !== null) setIsolate(isolated);
+});
+// The plate can be parked when the reader wants the full globe/planet view.
+const lanebarEl = document.getElementById('lanebar');
+const laneToggle = document.getElementById('laneToggle');
+function setLanePlate(collapsed, persist) {
+  lanebarEl.classList.toggle('collapsed', collapsed);
+  laneToggle.textContent = collapsed ? '▸' : '▾';
+  laneToggle.setAttribute('aria-expanded', String(!collapsed));
+  if (persist) localStorage.setItem('ofLanesCollapsed', collapsed ? '1' : '0');
+}
+setLanePlate(localStorage.getItem('ofLanesCollapsed') === '1', false);
+laneToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  setLanePlate(!lanebarEl.classList.contains('collapsed'), true);
 });
 
 // Current Sun-centered JPL vectors, interpolated with their reported velocity
